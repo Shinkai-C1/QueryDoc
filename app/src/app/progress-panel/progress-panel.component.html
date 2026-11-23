@@ -1,0 +1,149 @@
+@if (open()) {
+  <div class="side-panel-backdrop" aria-hidden="true" (click)="closed.emit()"></div>
+  <aside class="side-panel" role="dialog" aria-modal="true" aria-label="具体进度">
+    <header class="side-panel-header">
+      <span class="side-panel-title">具体进度</span>
+      <button
+        type="button"
+        class="stop-all-btn"
+        [disabled]="stopping()"
+        (click)="stopOpen.set(true)"
+      >
+        {{ stopping() ? "停止中…" : "全部停止" }}
+      </button>
+      <button
+        type="button"
+        class="panel-close"
+        aria-label="关闭具体进度"
+        (click)="closed.emit()"
+      >
+        ✕
+      </button>
+    </header>
+    <div class="side-panel-body">
+      @if (rows().length === 0) {
+        <p class="muted">还没有上传文件。</p>
+      } @else {
+        <div class="grid-wrap">
+          <clr-datagrid>
+            <clr-dg-column>文件名</clr-dg-column>
+            <clr-dg-column>大小</clr-dg-column>
+            <clr-dg-column>解析</clr-dg-column>
+            <clr-dg-column>提取</clr-dg-column>
+            <clr-dg-column>
+              <span class="token-head">
+                <button
+                  type="button"
+                  class="token-btn"
+                  [disabled]="state.activeProvider() === 'ollama' || estimating()"
+                  [title]="
+                    state.activeProvider() === 'ollama'
+                      ? 'Token 预估仅支持 KIMI-API'
+                      : '估算每个文件提取输入的 Token 数量'
+                  "
+                  (click)="estimate()"
+                >
+                  {{ estimating() ? "估算中…" : "预估Token" }}
+                </button>
+                <clr-signpost>
+                  <cds-icon
+                    clrSignpostTrigger
+                    class="token-anchor"
+                    shape="info-standard"
+                    size="sm"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Token 预估说明"
+                  ></cds-icon>
+                  <clr-signpost-content clrPosition="bottom-middle" *clrIfOpen>
+                    <div class="token-tip">
+                      执行该操作，将发送请求估算提取的输入内容的 Token 数量。
+                    </div>
+                  </clr-signpost-content>
+                </clr-signpost>
+              </span>
+            </clr-dg-column>
+
+            <clr-dg-row
+              *clrDgItems="let row of rows(); trackBy: trackByFileId"
+              [clrDgItem]="row"
+            >
+              <clr-dg-cell class="file-name-cell" [title]="row.file.relative_path">
+                @let parts = row.file.original_name | midEllipsis;
+                <span class="mid-ellipsis">
+                  <span class="me-head">{{ parts.head }}</span>
+                  @if (parts.tail) {
+                    <span class="me-tail">{{ parts.tail }}</span>
+                  }
+                </span>
+              </clr-dg-cell>
+              <clr-dg-cell class="nowrap">{{ row.file.file_size | fileSize }}</clr-dg-cell>
+              <clr-dg-cell>
+                <app-stage-badge
+                  stage="parse"
+                  [status]="parseStatusOf(row)"
+                  [position]="parsePositionOf(row)"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell>
+                <app-stage-badge stage="extract" [status]="row.q?.extract_status ?? 'pending'" />
+              </clr-dg-cell>
+              <clr-dg-cell class="nowrap token-cell">
+                {{ tokenTextOf(row) }}
+              </clr-dg-cell>
+
+              <!-- 错误信息：Expandable row。仅有错误的行投影 detail（无 detail 不显示展开钮），
+                   展开后多行完整展示 -->
+              @if (errorTextOf(row)) {
+                <ng-container ngProjectAs="clr-dg-row-detail">
+                  <clr-dg-row-detail *clrIfExpanded>
+                    <div class="error-detail">{{ errorTextOf(row) }}</div>
+                  </clr-dg-row-detail>
+                </ng-container>
+              }
+            </clr-dg-row>
+          </clr-datagrid>
+        </div>
+      }
+
+      <div class="log-section">
+        <div class="log-title">运行日志</div>
+        <div class="log-box" #logBox>
+          @if (state.taskLogs().length === 0) {
+            <div class="muted">暂无日志。</div>
+          }
+          @for (line of state.taskLogs(); track $index) {
+            <div class="log-line">{{ line }}</div>
+          }
+        </div>
+      </div>
+    </div>
+  </aside>
+}
+
+<!-- 全部停止确认（Warning） -->
+<app-modal [open]="stopOpen()" title="全部停止" width="26.5rem">
+  <div class="alert alert-warning" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <span class="alert-text">
+          将中断正在解析或正在提取的任务，并清除任务队列中所有待解析或待提取的任务，同时清除解析或提取过程中的产物，任务回到未解析或未提取的状态。已完成解析或已完成提取的文件不受影响，结果均保留。
+        </span>
+      </div>
+    </div>
+  </div>
+  <p>确定要全部停止吗？</p>
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="stopOpen.set(false)">
+      取消
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-danger"
+      [disabled]="stopping()"
+      (click)="confirmStop()"
+    >
+      {{ stopping() ? "停止中…" : "全部停止" }}
+    </button>
+  </div>
+</app-modal>

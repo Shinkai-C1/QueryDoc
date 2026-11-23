@@ -1,0 +1,109 @@
+.keyword-table {
+  margin-top: 0;
+}
+
+/* 固定高度行区：关键词行多时内部滚动，弹窗不再增高 */
+.keyword-scroll {
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: var(--clr-base-border-radius-s, 0.15rem);
+}
+
+.keyword-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--cds-alias-object-container-background-shade, #f2f2f2);
+}
+
+.col-letter-cell {
+  width: 3rem;
+  font-weight: 600;
+}
+
+.col-op {
+  width: 4rem;
+}
+
+.col-type {
+  width: 8rem;
+}
+
+.type-cell {
+  width: 100%;
+}
+
+.type-cell select {
+  width: 100%;
+}
+
+.keyword-cell {
+  max-width: 20rem;
+}
+
+/* 定义行：紧贴其关键词主行（行间不 double 描边），textarea 满宽 */
+.def-row td {
+  border-top: none;
+  padding-top: 0;
+}
+
+.def-cell {
+  width: 100%;
+  margin: 0;
+}
+
+/* 顶部选填说明 */
+.form-tip {
+  margin-top: 0;
+  font-size: 0.6rem;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.batch-hint {
+  font-size: 0.55rem;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+/* 保存成功提示（保存按钮正下方常驻占位，按钮不位移） */
+.save-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.save-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  height: 0.9rem;
+  line-height: 0.9rem;
+  margin-top: 0.15rem;
+  font-size: 0.6rem;
+  color: var(--semantic-success-text);
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.batch-tip {
+  margin-top: 0;
+  font-size: 0.6rem;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.batch-input {
+  width: 100%;
+}
+
+.muted {
+  color: var(--cds-alias-typography-color-400, #999);
+}

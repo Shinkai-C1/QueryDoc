@@ -1,0 +1,128 @@
+<div class="tree-header">
+  <button
+    type="button"
+    class="btn btn-sm btn-primary import-btn"
+    (click)="importOpen.set(true)"
+  >
+    导入制度文件
+  </button>
+  <div class="btn-group">
+    <button
+      type="button"
+      class="btn btn-sm"
+      title="下载人员名册 xlsx 模版"
+      (click)="downloadTemplate('roster')"
+    >
+      名册模版
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm"
+      title="导入人员名册 xlsx"
+      (click)="importXlsx('roster')"
+    >
+      名册导入
+    </button>
+  </div>
+  <div class="btn-group">
+    <button
+      type="button"
+      class="btn btn-sm"
+      title="下载组织结构 xlsx 模版"
+      (click)="downloadTemplate('org')"
+    >
+      组织模版
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm"
+      title="导入组织结构 xlsx"
+      (click)="importXlsx('org')"
+    >
+      组织导入
+    </button>
+  </div>
+</div>
+
+@if (rows().length === 0) {
+  <p class="muted empty-hint">尚未导入制度文件</p>
+} @else {
+  <!-- 文件管理器风格行列表：目录点击展开/收起，行间隔行分色 -->
+  <div class="fm-list" role="tree" aria-label="制度文件目录">
+    @for (r of rows(); track r.key; let i = $index) {
+      <div
+        class="trow"
+        [class.odd]="i % 2 === 1"
+        role="treeitem"
+        [attr.aria-level]="r.depth + 1"
+        [attr.aria-selected]="!r.folder && state.activeDocId() === r.doc!.id"
+        [attr.aria-expanded]="r.folder ? !isCollapsed(r.path) : null"
+        [style.padding-left.px]="6 + r.depth * 16"
+      >
+        @if (r.folder) {
+          <button
+            type="button"
+            class="row-main folder"
+            [title]="r.path"
+            (click)="toggleFolder(r.path)"
+          >
+            <cds-icon
+              shape="angle"
+              class="ic-caret"
+              [attr.direction]="isCollapsed(r.path) ? 'right' : 'down'"
+            ></cds-icon>
+            <cds-icon shape="folder" class="ic-folder"></cds-icon>
+            <span class="row-name">{{ r.name }}</span>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="row-main file"
+            [class.active]="state.activeDocId() === r.doc!.id"
+            [title]="r.doc!.rel_path"
+            (click)="state.openDoc(r.doc!.id)"
+          >
+            <span class="caret-spacer"></span>
+            <cds-icon shape="file" class="ic-file"></cds-icon>
+            <span class="row-name">{{ r.name }}</span>
+          </button>
+          <button
+            type="button"
+            class="file-del"
+            [attr.aria-label]="'删除 ' + r.name"
+            [title]="'删除 ' + r.name + '（流程图保留，跳转失效）'"
+            (click)="deleteTarget.set(r.doc)"
+          >
+            ✕
+          </button>
+        }
+      </div>
+    }
+  </div>
+}
+
+<app-import-docs-modal [open]="importOpen()" (closed)="importOpen.set(false)" />
+
+<!-- 删除制度文件确认（流程图保留，跳转失效） -->
+<app-modal [open]="deleteTarget() !== null" title="删除制度文件" width="26.5rem">
+  @if (deleteTarget(); as target) {
+    <div class="alert alert-warning" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <span class="alert-text">
+            删除后引用该文件的 PDF 跳转与制度索引将失效；流程图节点保留。
+          </span>
+        </div>
+      </div>
+    </div>
+    <p>确定删除制度文件「{{ target.name }}」吗？</p>
+  }
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="deleteTarget.set(null)">
+      取消
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" (click)="confirmDelete()">
+      删除
+    </button>
+  </div>
+</app-modal>

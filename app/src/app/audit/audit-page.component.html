@@ -1,0 +1,100 @@
+<div class="page" #pageHost [class.right-collapsed]="state.rightCollapsed()">
+  <!-- 左栏：页签 + 流程图区域（宽度可拖拽调整） -->
+  <section class="flow-pane" [style.width.%]="state.rightCollapsed() ? null : state.leftPct()">
+    <div class="audit-header">
+      <button type="button" class="btn btn-sm btn-link back-btn" (click)="goBack()">
+        ← 返回
+      </button>
+      @if (state.project(); as proj) {
+        <span class="task-title">{{ proj.name }}</span>
+        <span class="task-group">{{ proj.group_name }}</span>
+      }
+    </div>
+
+    <clr-tabs>
+      <clr-tab>
+        <button type="button" clrTabLink (click)="setTab('flow')">流程图</button>
+        <clr-tab-content class="tab-fill">
+          <app-flow-canvas />
+        </clr-tab-content>
+      </clr-tab>
+      <clr-tab>
+        <button type="button" clrTabLink (click)="setTab('detail')">流程明细</button>
+        <clr-tab-content class="tab-fill">
+          <app-flow-detail />
+        </clr-tab-content>
+      </clr-tab>
+      <clr-tab>
+        <button type="button" clrTabLink (click)="setTab('roster')">人员名册</button>
+        <clr-tab-content class="tab-fill">
+          <app-roster-table />
+        </clr-tab-content>
+      </clr-tab>
+      <clr-tab>
+        <button type="button" clrTabLink (click)="setTab('org')">组织结构</button>
+        <clr-tab-content class="tab-fill">
+          <app-org-table />
+        </clr-tab-content>
+      </clr-tab>
+      <clr-tab>
+        <button type="button" clrTabLink (click)="setTab('relation')">制度关系</button>
+        <clr-tab-content class="tab-fill">
+          <app-doc-relation />
+        </clr-tab-content>
+      </clr-tab>
+    </clr-tabs>
+  </section>
+
+  <!-- 分栏拖拽条 -->
+  <div
+    class="split-divider"
+    role="separator"
+    aria-orientation="vertical"
+    aria-label="拖动调整左右窗口大小"
+    (mousedown)="onDividerDown($event, pageHost)"
+  ></div>
+
+  <!-- 右栏：上=制度文件目录（可向上收起/向下展开），下=PDF 预览；整体可向右收起 -->
+  <div class="right-col" [class.collapsed]="state.rightCollapsed()">
+    @if (state.rightCollapsed()) {
+      <button
+        type="button"
+        class="btn btn-sm btn-link right-expand-btn"
+        title="展开右侧窗口"
+        (click)="state.rightCollapsed.set(false)"
+      >
+        <span class="expand-arrow">◀</span>
+        <span class="expand-text">展开</span>
+      </button>
+    } @else {
+      <section class="tree-pane" [class.collapsed]="state.treeCollapsed()">
+        <div class="tree-pane-header">
+          <span class="tree-pane-title">制度文件目录</span>
+          <span class="header-spacer"></span>
+          <button
+            type="button"
+            class="btn btn-sm btn-link"
+            [title]="state.treeCollapsed() ? '向下展开制度文件目录' : '向上收起制度文件目录'"
+            (click)="state.treeCollapsed.set(!state.treeCollapsed())"
+          >
+            {{ state.treeCollapsed() ? "展开 ▼" : "收起 ▲" }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-link col-collapse-btn"
+            title="向右收起右侧窗口"
+            (click)="state.rightCollapsed.set(true)"
+          >
+            ▶
+          </button>
+        </div>
+        @if (!state.treeCollapsed()) {
+          <app-doc-tree />
+        }
+      </section>
+      <section class="pdf-pane">
+        <app-audit-pdf />
+      </section>
+    }
+  </div>
+</div>

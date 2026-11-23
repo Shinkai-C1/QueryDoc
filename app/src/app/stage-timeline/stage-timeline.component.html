@@ -1,0 +1,249 @@
+<div class="timeline-wrap">
+  <!-- 框内顶行：成功 alert（宽度填满）+ 查看具体进度（Solid 蓝） -->
+  <div class="timeline-top">
+    <!-- 解析/提取/导出完成提示：定位临时 alert，同一时刻只显示一条（新事件替换旧） -->
+    @if (topAlert(); as msg) {
+      <div class="alert alert-success export-alert" role="status">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <span class="alert-text" [title]="msg">{{ msg }}</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="close alert-close-x"
+          aria-label="关闭提示"
+          (click)="topAlert.set(null)"
+        >
+          ✕
+        </button>
+      </div>
+    }
+    <button
+      type="button"
+      class="btn btn-sm btn-primary progress-btn"
+      (click)="progressOpen.set(true)"
+    >
+      查看具体进度
+    </button>
+  </div>
+
+  <div class="clr-timeline">
+    <!-- 1 上传文件 -->
+    <div class="clr-timeline-step">
+      @switch (uploadState()) {
+        @case ("success") {
+          <cds-icon shape="success-standard"></cds-icon>
+        }
+        @case ("processing") {
+          <span class="spinner spinner-md step-spinner"></span>
+        }
+        @case ("error") {
+          <cds-icon shape="error-standard"></cds-icon>
+        }
+        @default {
+          <cds-icon shape="circle"></cds-icon>
+        }
+      }
+      <div class="clr-timeline-step-body">
+        <div class="clr-timeline-step-title">上传文件</div>
+        <div class="clr-timeline-step-description">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline"
+            [disabled]="state.busy()"
+            (click)="upload()"
+          >
+            {{ state.busy() ? "处理中…" : "上传文件" }}
+          </button>
+          <!-- 无进度提示的节点也常驻占位行：五节点行高一致，状态切换不位移 -->
+          <span class="step-numbers invisible">占位</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 解析文件 -->
+    <div class="clr-timeline-step">
+      @switch (parseState()) {
+        @case ("success") {
+          <cds-icon shape="success-standard"></cds-icon>
+        }
+        @case ("processing") {
+          <span class="spinner spinner-md step-spinner"></span>
+        }
+        @case ("error") {
+          <cds-icon shape="error-standard"></cds-icon>
+        }
+        @default {
+          <cds-icon shape="circle"></cds-icon>
+        }
+      }
+      <div class="clr-timeline-step-body">
+        <div class="clr-timeline-step-title">解析文件</div>
+        <div class="clr-timeline-step-description">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline"
+            [disabled]="!canStartParse()"
+            (click)="startParse()"
+          >
+            解析文件
+          </button>
+          <!-- 进度行常驻占位：状态变化不引起上下位移 -->
+          <span class="step-numbers" [class.invisible]="state.files().length === 0">{{
+            parseNumbers()
+          }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 添加关键词 -->
+    <div class="clr-timeline-step">
+      @switch (keywordState()) {
+        @case ("success") {
+          <cds-icon shape="success-standard"></cds-icon>
+        }
+        @default {
+          <cds-icon shape="circle"></cds-icon>
+        }
+      }
+      <div class="clr-timeline-step-body">
+        <div class="clr-timeline-step-title">编辑关键词</div>
+        <div class="clr-timeline-step-description">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline"
+            (click)="keywordOpen.set(true)"
+          >
+            编辑关键词
+          </button>
+          <span class="step-numbers" [class.invisible]="keywordCount() === 0"
+            >{{ keywordCount() }} 个关键词</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 提取信息 -->
+    <div class="clr-timeline-step">
+      @switch (extractState()) {
+        @case ("success") {
+          <cds-icon shape="success-standard"></cds-icon>
+        }
+        @case ("processing") {
+          <span class="spinner spinner-md step-spinner"></span>
+        }
+        @case ("error") {
+          <cds-icon shape="error-standard"></cds-icon>
+        }
+        @default {
+          <cds-icon shape="circle"></cds-icon>
+        }
+      }
+      <div class="clr-timeline-step-body">
+        <div class="clr-timeline-step-title">提取信息</div>
+        <div class="clr-timeline-step-description">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline"
+            [disabled]="!canExtractNow()"
+            (click)="onExtractClick()"
+          >
+            {{ extractStale() ? "重新提取" : "提取信息" }}
+          </button>
+          <span class="step-numbers">
+            {{ extractNumbers() }}
+            <!-- 过期提示图标常驻槽位：出现/消失不挤动进度数字 -->
+            <span class="stale-slot">
+              @if (extractStale()) {
+                <!-- Clarity Angular 官方 Signpost：弹层在图标上方居中，开关自管 -->
+                <clr-signpost>
+                  <cds-icon
+                    clrSignpostTrigger
+                    class="stale-anchor"
+                    shape="exclamation-triangle"
+                    size="sm"
+                    role="button"
+                    tabindex="0"
+                    aria-label="提取过期提示"
+                  ></cds-icon>
+                  <clr-signpost-content clrPosition="top-middle" *clrIfOpen>
+                    <div class="stale-tip">{{ extractStaleText() }}</div>
+                  </clr-signpost-content>
+                </clr-signpost>
+              }
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 导出结果 -->
+    <div class="clr-timeline-step">
+      @switch (exportState()) {
+        @case ("success") {
+          <cds-icon shape="success-standard"></cds-icon>
+        }
+        @case ("processing") {
+          <span class="spinner spinner-md step-spinner"></span>
+        }
+        @case ("error") {
+          <cds-icon shape="error-standard"></cds-icon>
+        }
+        @default {
+          <cds-icon shape="circle"></cds-icon>
+        }
+      }
+      <div class="clr-timeline-step-body">
+        <div class="clr-timeline-step-title">导出结果</div>
+        <div class="clr-timeline-step-description">
+          <!-- Clarity Angular 官方 Dropdown：触发/定位/外点关闭自管 -->
+          <clr-dropdown>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline dropdown-toggle"
+              [disabled]="!hasResults()"
+              clrDropdownTrigger
+            >
+              导出选项
+              <cds-icon shape="angle" direction="down"></cds-icon>
+            </button>
+            <clr-dropdown-menu clrPosition="bottom-right">
+              <button
+                type="button"
+                class="dropdown-item"
+                [clrDisabled]="exportRunning()"
+                clrDropdownItem
+                (click)="onExport('table')"
+              >
+                导出数据表格
+              </button>
+              <button
+                type="button"
+                class="dropdown-item"
+                [clrDisabled]="exportRunning()"
+                clrDropdownItem
+                (click)="onExport('full')"
+              >
+                导出含附件表格
+              </button>
+              <button type="button" class="dropdown-item" clrDropdownItem (click)="onCopy()">
+                复制表格至剪切板
+              </button>
+            </clr-dropdown-menu>
+          </clr-dropdown>
+          @if (exportState() === "processing") {
+            <span class="step-numbers">{{ exportNumbers() }}</span>
+          } @else {
+            <span class="step-numbers" [class.invisible]="hasResults()"
+              >暂无提取结果可导出</span
+            >
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-keyword-modal [open]="keywordOpen()" (closed)="keywordOpen.set(false)" />
+<app-progress-panel [open]="progressOpen()" (closed)="progressOpen.set(false)" />

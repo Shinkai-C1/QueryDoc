@@ -1,0 +1,74 @@
+/* QueryDoc 全局样式：基色与语义 token（依据《前端颜色要求.md》与 README §9.2） */
+
+:root {
+  /* 基色阶梯（仅纳入使用的档位） */
+  --color-blue-600: #0064dd;
+  --color-blue-700: #0053b8;
+  --color-blue-950: #002452;
+  --color-magenta-700: #960081;
+
+  --color-green-050: #edf7ed;
+  --color-green-400: #42b34b;
+  --color-green-700: #006e06;
+
+  --color-red-050: #fcebeb;
+  --color-red-400: #e73535;
+  --color-red-500: #d11919;
+
+  --color-purple-600: #7a00dd;
+  --color-purple-700: #6500b8;
+
+  --color-yellow-050: #fffce6;
+  --color-yellow-100: #fff7bf;
+  --color-yellow-400: #ffda00;
+  --color-yellow-800: #7a6700;
+
+  /* 品牌与交互 */
+  --interactive-link-default: var(--color-blue-600);
+  --interactive-link-visited: var(--color-magenta-700);
+  --interactive-primary-bg: var(--color-blue-600);
+  --interactive-primary-text: #ffffff;
+  --interactive-hover-bg: var(--color-blue-700);
+
+  /* 语义状态 */
+  --semantic-success-text: var(--color-green-700);
+  --semantic-success-border: var(--color-green-400);
+  --semantic-success-bg: var(--color-green-050);
+
+  --semantic-error-text: var(--color-red-500);
+  --semantic-error-border: var(--color-red-400);
+  --semantic-error-bg: var(--color-red-050);
+
+  --semantic-warning-text: var(--color-yellow-800);
+  --semantic-warning-border: var(--color-yellow-400);
+  --semantic-warning-bg: var(--color-yellow-050);
+
+  /* PDF 联动 */
+  --pdf-highlight-bg: rgba(255, 252, 230, 0.28); /* yellow-050，低透明度不遮字 */
+  --pdf-selection-border: var(--color-red-400); /* red-400 #E73535 */
+}
+
+/*
+ * 组件规则：凡 Clarity 有现成组件（@clr/ui CSS 类、@cds/core），一律在其基础上修改；
+ * Clarity 组件自带的状态图形（如 timeline 的 circle/success-standard/error-standard、spinner）允许使用。
+ * 无图标原则（README 设计规范）仍适用于功能入口：按钮、操作、状态提示一律纯文本标签，
+ * 不引入图标作为功能替代。
+ */
+
+/* 应用窗口禁止整窗滚动（内部容器如表格/预览/日志区仍可自行滚动） */
+html,
+body {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 新建任务「所属项目」combobox：clr-combobox-container 自带 clr-ui
+   .clr-form-control 的 margin-top，嵌在字段内会顶出一行空隙——归零对齐
+   其余输入框（组件样式作用域到不了子组件内部，需全局） */
+.clr-combobox-form-control.clr-form-control {
+  margin-top: 0;
+}
+
+.clr-combobox-wrapper.clr-popover-origin {
+  padding-top: 0;
+}

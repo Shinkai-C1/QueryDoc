@@ -1,0 +1,46 @@
+# OCR 模型清单
+# 下载脚本：node app/scripts/download-models.mjs
+# 模型二进制落到同目录 files/（已 gitignore），下载后按 sha256 校验。
+# 应用首次初始化 OCR 引擎时对要加载的模型再做一次 sha256 校验
+#（见 app/src-tauri/src/ocr/models.rs）。
+# 来源：HuggingFace PaddlePaddle 官方 org（Apache-2.0），inference.yml 为官方前/后处理配置。
+#
+# 本清单只含随包默认模型（small 档 + 辅助模型，合计约 39MB）。
+# medium 档与 PP-DocLayoutV3 未随包分发；如需启用，把对应条目加回本清单
+# 并重新运行下载脚本。
+
+[meta]
+version = 1
+dest_dir = "files"
+
+[[model]]
+name = "PP-OCRv6_small_det"
+file = "PP-OCRv6_small_det_onnx.onnx"
+url = "https://huggingface.co/PaddlePaddle/PP-OCRv6_small_det_onnx/resolve/main/inference.onnx"
+sha256 = "d73e0058b7a8086bbd57f3d10b8bcd4ff95363f67e06e2762b5e814fe9c9410e"
+
+[[model]]
+name = "PP-OCRv6_small_rec"
+file = "PP-OCRv6_small_rec_onnx.onnx"
+url = "https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx/resolve/main/inference.onnx"
+sha256 = "5435fd747c9e0efe15a96d0b378d5bd157e9492ed8fd80edf08f30d02fa24634"
+
+[[model]]
+name = "PP-LCNet_x1_0_doc_ori"
+file = "PP-LCNet_x1_0_doc_ori_onnx.onnx"
+url = "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori_onnx/resolve/main/inference.onnx"
+sha256 = "af9a0a4f317ff0709ce752067807f819cb15d883f8ecad89f28df1c6ee2d9c92"
+
+[[model]]
+name = "PP-LCNet_x0_25_textline_ori"
+file = "PP-LCNet_x0_25_textline_ori_onnx.onnx"
+url = "https://huggingface.co/PaddlePaddle/PP-LCNet_x0_25_textline_ori_onnx/resolve/main/inference.onnx"
+sha256 = "94a6a0a0425f2b5f08b5df72086f2d72abe40f1d22f6d12d2cd83674f11f2ff3"
+
+# ---- 可选：矫正（Spike 1.5 决策；默认走 det 角度估算 + 仿射旋转） ----
+# [[model]]
+# name = "UVDoc"
+# file = "UVDoc_onnx.onnx"
+# url = "https://huggingface.co/PaddlePaddle/UVDoc_onnx/resolve/main/inference.onnx"
+# sha256 = ""   # 下载后本地计算回填
+# optional = true

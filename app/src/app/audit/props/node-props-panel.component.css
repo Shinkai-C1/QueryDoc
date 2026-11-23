@@ -1,0 +1,109 @@
+:host {
+  display: contents;
+}
+
+/* 侧滑面板：流程图区域右侧覆盖 */
+.props-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 15rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--cds-alias-object-container-background, #fff);
+  border-left: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.12);
+}
+
+.panel-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--cds-alias-object-border-color, #eee);
+}
+
+.panel-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.panel-header .btn {
+  margin: 0;
+  min-width: 0;
+  padding: 0 0.2rem;
+}
+
+.panel-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.prop-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+}
+
+.prop-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.prop-label {
+  flex: none;
+  width: 4.2rem;
+  font-size: 0.58rem;
+  color: var(--cds-alias-typography-color-400, #666);
+  padding-top: 0.1rem;
+}
+
+.prop-field .prop-label {
+  width: auto;
+}
+
+.prop-section {
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--cds-alias-object-border-color, #eee);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.mono {
+  font-family: monospace;
+}
+
+.source-link {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  height: auto;
+  font-size: 0.62rem;
+  text-align: left;
+  white-space: normal;
+}
+
+.rel-chip {
+  display: inline-block;
+  font-size: 0.55rem;
+  background: #edf7ed;
+  border: 1px solid #a9dcad;
+  border-radius: 3px;
+  padding: 0 0.3rem;
+  margin: 0 0.15rem 0.15rem 0;
+}
+
+.muted {
+  color: var(--cds-alias-typography-color-400, #888);
+}

@@ -1,0 +1,296 @@
+<div class="list-page">
+  @if (state.errorMessage(); as msg) {
+    <app-notice type="error" (closed)="state.errorMessage.set(null)">
+      {{ msg }}
+    </app-notice>
+  }
+
+  <div class="list-toolbar">
+    <button type="button" class="btn btn-sm btn-primary" (click)="openCreate()">
+      新增任务
+    </button>
+    <span class="list-toolbar-flex"></span>
+    <div class="clr-input-wrapper search-box">
+      <input
+        type="text"
+        class="clr-input"
+        name="taskSearch"
+        [ngModel]="searchText()"
+        (ngModelChange)="onSearch($event)"
+        placeholder="搜索任务名称"
+        aria-label="搜索任务名称"
+      />
+    </div>
+  </div>
+
+  @if (state.projects().length === 0) {
+    <div class="empty-state">
+      <p>还没有任务，点击左上角「新增任务」开始。</p>
+    </div>
+  } @else {
+    <table class="table task-table">
+      <thead>
+        <tr>
+          <th class="left">
+            <button type="button" class="th-sort" (click)="toggleSort('name')">
+              任务{{ sortMark("name") }}
+            </button>
+          </th>
+          <th class="left">
+            <span class="th-group">
+              <button type="button" class="th-sort" (click)="toggleSort('group_name')">
+                所属项目{{ sortMark("group_name") }}
+              </button>
+              <select
+                class="group-filter"
+                name="groupFilter"
+                [ngModel]="groupFilter()"
+                (ngModelChange)="onGroupFilter($event)"
+                aria-label="按所属项目筛选"
+              >
+                <option value="">全部</option>
+                @for (g of groups(); track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+            </span>
+          </th>
+          <th class="left">任务类型</th>
+          <th class="left">
+            <button type="button" class="th-sort" (click)="toggleSort('created_at')">
+              创建时间{{ sortMark("created_at") }}
+            </button>
+          </th>
+          <th class="left">
+            <button type="button" class="th-sort" (click)="toggleSort('updated_at')">
+              最近修改时间{{ sortMark("updated_at") }}
+            </button>
+          </th>
+          <th class="left">操作</th>
+          <th class="left">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pageRows(); track trackByProjectId($index, p)) {
+          <tr>
+            <td class="left task-name" [title]="p.name">{{ p.name }}</td>
+            <td class="left">{{ p.group_name }}</td>
+            <td class="left">{{ taskTypeLabel(p) }}</td>
+            <td class="left time-cell">{{ p.created_at }}</td>
+            <td class="left time-cell">{{ p.updated_at }}</td>
+            <td class="left">
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm" (click)="enter(p)">
+                  进入
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-danger-outline"
+                  (click)="askDelete(p)"
+                >
+                  删除
+                </button>
+              </div>
+            </td>
+            <td class="left status-cell">
+              @if (statusOf(p); as st) {
+                @if (st.running) {
+                  <span class="label label-info">{{ st.running }}</span>
+                } @else if (st.empty) {
+                  <span class="muted">—</span>
+                } @else if (st.done) {
+                  <span class="label label-success">已完成</span>
+                } @else {
+                  @if (st.parsePending > 0) {
+                    <span class="label">
+                      待解析
+                      <span class="badge">{{ st.parsePending > 99 ? "99+" : st.parsePending }}</span>
+                    </span>
+                  }
+                  @if (st.parseError > 0) {
+                    <span class="label label-danger">
+                      解析失败
+                      <span class="badge badge-danger">{{ st.parseError > 99 ? "99+" : st.parseError }}</span>
+                    </span>
+                  }
+                  @if (st.extractPending > 0) {
+                    <span class="label label-info">
+                      待提取
+                      <span class="badge badge-info">{{ st.extractPending > 99 ? "99+" : st.extractPending }}</span>
+                    </span>
+                  }
+                  @if (st.extractError > 0) {
+                    <span class="label label-danger">
+                      提取失败
+                      <span class="badge badge-danger">{{ st.extractError > 99 ? "99+" : st.extractError }}</span>
+                    </span>
+                  }
+                }
+              }
+            </td>
+          </tr>
+        }
+        @if (pageRows().length === 0) {
+          <tr>
+            <td colspan="7" class="left muted">没有匹配的任务记录。</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <span class="muted">共 {{ sorted().length }} 条</span>
+      <span class="pagination-flex"></span>
+      <button
+        type="button"
+        class="btn btn-sm btn-link"
+        [disabled]="page() <= 1"
+        (click)="gotoPage(page() - 1)"
+      >
+        上一页
+      </button>
+      @for (n of pageWindow(); track n) {
+        <button
+          type="button"
+          class="btn btn-sm btn-link"
+          [class.page-current]="n === page()"
+          (click)="gotoPage(n)"
+        >
+          {{ n }}
+        </button>
+      }
+      <button
+        type="button"
+        class="btn btn-sm btn-link"
+        [disabled]="page() >= pageCount()"
+        (click)="gotoPage(page() + 1)"
+      >
+        下一页
+      </button>
+    </div>
+  }
+</div>
+
+<!-- 新增任务 -->
+<app-modal [open]="createOpen()" title="新增任务">
+  <div class="clr-form-control">
+    <label class="clr-control-label" for="qd-task-name">任务名称</label>
+    <div class="clr-control-container">
+      <div class="clr-input-wrapper">
+        <input
+          id="qd-task-name"
+          type="text"
+          class="clr-input"
+          name="taskName"
+          [ngModel]="newName()"
+          (ngModelChange)="newName.set($event)"
+          placeholder="例如：2024 年报核对"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="clr-form-control">
+    <label class="clr-control-label" for="qd-task-type">任务类型</label>
+    <div class="clr-control-container">
+      <div class="clr-select-wrapper">
+        <select
+          id="qd-task-type"
+          class="clr-select"
+          name="taskType"
+          [ngModel]="newTaskType()"
+          (ngModelChange)="newTaskType.set($event)"
+        >
+          <option value="parse">解析提取</option>
+          <option value="audit">内控测试</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="clr-form-control">
+    <label class="clr-control-label" for="qd-task-group">所属项目</label>
+    <div class="clr-control-container">
+      <div class="clr-input-wrapper">
+        <!-- 所属项目：Clarity 官方可编辑下拉（可选已有项目/可自由输入新项目；
+             原生 datalist 在 WKWebView 中选项白底白字不可见，已弃用） -->
+        <clr-combobox
+          placeholder="选择已有项目，或输入新项目名称"
+          name="taskGroup"
+          [clrEditable]="true"
+          [clrEditableResolverFn]="groupResolver"
+          [ngModel]="newGroup()"
+          (ngModelChange)="newGroup.set($event)"
+          (clrInputChange)="newGroup.set($event)"
+        >
+          <ng-container *clrOptionItems="let g of groups()">
+            <clr-option [clrValue]="g">{{ g }}</clr-option>
+          </ng-container>
+        </clr-combobox>
+      </div>
+    </div>
+  </div>
+  <!-- 任务存放目录（仅解析提取；内控测试不落本地文件夹） -->
+  @if (newTaskType() === "parse") {
+    <div class="clr-form-control">
+      <div class="clr-control-label">任务存放目录</div>
+      <div class="clr-control-container dir-picker">
+        <button type="button" class="btn btn-sm" (click)="pickBasePath()">
+          选择目录…
+        </button>
+        <span class="picked-dir" [title]="newBasePath()">
+          {{ newBasePath() || "未选择" }}
+        </span>
+      </div>
+    </div>
+  }
+  @if (createError(); as err) {
+    <div class="alert alert-danger" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <span class="alert-text">{{ err }}</span>
+        </div>
+      </div>
+    </div>
+  }
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="createOpen.set(false)">
+      取消
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-primary"
+      [disabled]="creating()"
+      (click)="submitCreate()"
+    >
+      {{ creating() ? "创建中…" : "创建" }}
+    </button>
+  </div>
+</app-modal>
+
+<!-- 删除任务确认（Clarity Alert-in-Modal，Warning 样式） -->
+<app-modal [open]="deleteTarget() !== null" title="删除任务" width="26.5rem">
+  @if (deleteTarget(); as target) {
+    <div class="alert alert-warning" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <span class="alert-text">
+            删除后任务目录「{{ target.project_dir }}」将移入系统回收站，数据库记录同时删除。
+          </span>
+        </div>
+      </div>
+    </div>
+    <p>确定删除任务「{{ target.name }}」吗？</p>
+  }
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="deleteTarget.set(null)">
+      取消
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-danger"
+      [disabled]="state.busy()"
+      (click)="confirmDelete()"
+    >
+      删除
+    </button>
+  </div>
+</app-modal>

@@ -1,0 +1,52 @@
+[package]
+name = "app"
+version = "0.0.12"
+description = "QueryDoc：扫描合同 PDF 的离线 OCR + LLM 信息提取桌面应用（Tauri v2）"
+authors = ["QueryDoc contributors"]
+license = "MIT"
+repository = "https://github.com/your-org/QueryDoc"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+thiserror = "2.0.20"
+chrono = { version = "0.4.45", default-features = false, features = ["std", "clock"] }
+trash = "5.2.6"
+reqwest = { version = "0.13.4", default-features = false, features = ["rustls", "json"] }
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+tauri-plugin-dialog = "2.7.3"
+tauri-plugin-single-instance = "2"
+# OCR（ort 走 load-dynamic，dylib 在 resources/onnxruntime/）
+ort = { version = "=2.0.0-rc.13", default-features = false, features = ["std", "ndarray", "load-dynamic"] }
+pdfium-render = "0.8"
+image = "0.25"
+imageproc = "0.25"
+ndarray = "0.17"
+regex = "1"
+sha2 = "0.10"
+rust_xlsxwriter = "0.99.0"
+# 内控测试：人员名册/组织结构 xlsx 导入解析（只读）
+calamine = "0.36"
+zip = { version = "8.6.0", default-features = false }
+tempfile = "3.27.0"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+# IPC 集成测试需要 tauri::test（mock runtime / get_ipc_response）
+tauri = { version = "2", features = ["test"] }
+

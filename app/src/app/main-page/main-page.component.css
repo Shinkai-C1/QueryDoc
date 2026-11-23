@@ -1,0 +1,136 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.page {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ---- 任务头部：返回 + 任务名（与右侧 PDF 工具栏同一水平线，同高居中） ---- */
+.task-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.task-header .btn {
+  margin: 0;
+}
+
+/* 返回按钮（Clarity arrow 图标 + 文字，同 PDF 收起按钮风格） */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  height: auto;
+  min-height: 0;
+  padding: 0.1rem 0.3rem 0.1rem 0.1rem;
+  font-weight: 700;
+}
+
+.back-arrow {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.task-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.task-group {
+  font-size: 0.55rem;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.header-spacer {
+  flex: 1;
+}
+
+/* 当前 LLM 提供商徽标：深棕底白字（Ollama）/ 红底白字（KIMI-API） */
+.llm-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #fff;
+  background: #4e342e;
+  white-space: nowrap;
+}
+
+.llm-badge.badge-kimi {
+  background: var(--color-red-500);
+}
+
+/* ---- 中栏内容区：时间线固定在上，表格区填满剩余高度 ---- */
+.content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 0.8rem;
+}
+
+.content app-extract-table {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---- 右栏 PDF 预览 ---- */
+.viewer-pane {
+  width: 42%;
+  min-width: 24rem;
+  flex: none;
+  min-height: 0;
+}
+
+/* 收起态：窄条 + 顶部 < 展开箭头（宽度受限，覆盖 btn 默认最小宽度防裁剪） */
+.viewer-pane.collapsed {
+  width: 2rem;
+  min-width: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-left: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  background: var(--cds-alias-object-container-background-shade, #fafafa);
+}
+
+.expand-btn {
+  width: 100%;
+  min-width: 0;
+  height: auto; /* 覆盖 btn-sm 固定高度，竖排两字才能完整显示 */
+  min-height: 0;
+  margin: 0;
+  padding: 0.4rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-weight: 700;
+  overflow: visible;
+  white-space: normal;
+}
+
+.expand-arrow {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.expand-text {
+  writing-mode: vertical-rl;
+  font-size: 0.55rem;
+  letter-spacing: 0.1rem;
+}
+
+.empty-state {
+  margin-top: 2rem;
+  text-align: center;
+  color: var(--cds-alias-typography-color-400, #666);
+}

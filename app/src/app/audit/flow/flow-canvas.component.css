@@ -1,0 +1,328 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.flow-host {
+  position: relative;
+  height: 100%;
+  outline: none;
+}
+
+f-flow {
+  display: block;
+  height: 100%;
+}
+
+/* ---- 环境组背景矩形 ---- */
+.env-group {
+  position: absolute;
+  border: 1.5px dashed #007278;
+  background: rgba(139, 226, 230, 0.08);
+  border-radius: 6px;
+}
+
+.env-group.env-manual {
+  border-color: #9c5900;
+  background: rgba(255, 174, 76, 0.08);
+}
+
+.env-label {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.4rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #004052;
+}
+
+.env-manual .env-label {
+  color: #573100;
+}
+
+/* ---- 节点通用 ---- */
+.node {
+  min-width: 8rem;
+  min-height: 2.6rem;
+  background: #fff;
+  border: 1.5px solid #0064dd;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  cursor: default;
+  user-select: none;
+  position: relative;
+}
+
+/* 选中高亮（含 foblex 框选 f-selected）：粗蓝边 + 光晕 */
+.node.selected,
+.node.f-selected {
+  border-color: #0053b8;
+  border-width: 2.5px;
+  box-shadow: 0 0 0 3px rgba(0, 100, 221, 0.35);
+}
+
+/* ---- 节点内部：左上编号+名称标题，中部内容自适应换行 ---- */
+.node-body {
+  position: relative;
+  z-index: 1;
+  padding: 0.25rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.node-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.node-code {
+  font-family: monospace;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: #0053b8;
+  flex: none;
+}
+
+.node-name {
+  font-size: 0.62rem;
+  font-weight: 700;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+/* 内容完整显示：自动换行 + 节点随内容自适应增高 */
+.node-content {
+  font-size: 0.56rem;
+  color: var(--cds-alias-typography-color-400, #555);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.node-sub {
+  font-size: 0.5rem;
+  color: var(--cds-alias-typography-color-400, #888);
+}
+
+/* ---- 四方向连接点 ---- */
+.conn {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #0064dd;
+  z-index: 2;
+}
+
+.conn-t {
+  top: -6px;
+  left: calc(50% - 5px);
+}
+
+.conn-b {
+  bottom: -6px;
+  left: calc(50% - 5px);
+}
+
+.conn-l {
+  left: -6px;
+  top: calc(50% - 5px);
+}
+
+.conn-r {
+  right: -6px;
+  top: calc(50% - 5px);
+}
+
+/* ---- 缩放手柄（右下） ---- */
+.resize-handle {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #fff;
+  border: 2px solid #0064dd;
+  cursor: nwse-resize;
+  z-index: 3;
+}
+
+/* ---- 类型着色（统一矩形，仅颜色区分） ---- */
+.node-act {
+  border-color: #0064dd;
+}
+.node-evt {
+  border-color: #007191;
+  background: #f4fbfd;
+}
+.node-rol {
+  border-color: #006e06;
+  background: #f8fcf6;
+}
+.node-dat {
+  border-color: #b51616;
+  background: #fdf9f9;
+}
+.node-log {
+  border-color: #6500b8;
+  background: #fbf7fd;
+}
+
+.node-evt .node-code {
+  color: #007191;
+}
+.node-rol .node-code {
+  color: #006e06;
+}
+.node-dat .node-code {
+  color: #b51616;
+}
+.node-log .node-code {
+  color: #500091;
+}
+
+/* ---- 连线配色（role 绿 / data 橙；flow 用主题默认蓝） ---- */
+:host ::ng-deep .edge-role .f-connection-path {
+  stroke: #006e06;
+}
+
+:host ::ng-deep .edge-data .f-connection-path {
+  stroke: #b06000;
+}
+
+/* ---- 右键菜单（级联子菜单） ---- */
+.ctx-menu {
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: 9rem;
+  background: var(--cds-alias-object-container-background, #fff);
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  padding: 0.15rem 0;
+}
+
+.menu-item {
+  position: relative;
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.6rem;
+  cursor: pointer;
+  color: var(--cds-alias-typography-color-500, #333);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.menu-item:hover:not(:disabled),
+.menu-item.has-sub:hover {
+  background: var(--cds-alias-object-container-background-shade, #f0f0f0);
+}
+
+.menu-item:disabled {
+  color: var(--cds-alias-typography-color-300, #aaa);
+  cursor: not-allowed;
+}
+
+.menu-label {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.52rem;
+  color: var(--cds-alias-typography-color-400, #888);
+}
+
+.menu-sep {
+  border-top: 1px solid var(--cds-alias-object-border-color, #eee);
+  margin: 0.1rem 0;
+}
+
+.menu-cancel {
+  color: var(--cds-alias-typography-color-400, #888);
+}
+
+/* 级联子菜单：悬停向右展开 */
+.has-sub .submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -0.2rem;
+  min-width: 7rem;
+  background: var(--cds-alias-object-container-background, #fff);
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  padding: 0.15rem 0;
+  z-index: 51;
+}
+
+.has-sub:hover > .submenu {
+  display: block;
+}
+
+.sub-arrow {
+  font-size: 0.55rem;
+  color: var(--cds-alias-typography-color-400, #888);
+}
+
+.empty-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  pointer-events: none;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ---- 缩放控件 ---- */
+.zoom-bar {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 40;
+  display: flex;
+  gap: 0.15rem;
+}
+
+.zoom-btn {
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: 4px;
+  background: var(--cds-alias-object-container-background, #fff);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--cds-alias-typography-color-500, #333);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:hover {
+  background: #ebf2fc;
+}
+
+/* 隐藏连线端点的默认圆圈标记（只保留箭头） */
+:host ::ng-deep f-connection marker circle {
+  display: none;
+}
+
+/* 级联向左展开（右侧空间不足时） */
+.submenu.sub-left {
+  left: auto;
+  right: 100%;
+}

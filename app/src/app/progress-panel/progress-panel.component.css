@@ -1,0 +1,211 @@
+/* 右侧 Side Panel（Clarity side-panel 视觉：右侧全高、左侧阴影、滑入） */
+.side-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1041;
+  display: flex;
+  flex-direction: column;
+  width: 50rem;
+  max-width: 96vw;
+  height: 100vh;
+  background: var(--cds-alias-object-container-background, #fff);
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+  animation: qd-panel-in 0.18s ease-out;
+}
+
+@keyframes qd-panel-in {
+  from {
+    transform: translateX(2rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.side-panel-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+}
+
+.side-panel-title {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.panel-close {
+  flex: none;
+  border: none;
+  background: none;
+  padding: 0 0.1rem;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.panel-close:hover {
+  color: var(--cds-alias-typography-color-500, #333);
+}
+
+/* 「全部停止」：标题栏红底白字按钮 */
+.stop-all-btn {
+  flex: none;
+  border: none;
+  border-radius: 3px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-red-500);
+  cursor: pointer;
+}
+
+.stop-all-btn:hover:not(:disabled) {
+  background: var(--color-red-400);
+}
+
+.stop-all-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 表体固定区域：文件表与日志区上下分布，各自内部滚动 */
+.side-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.7rem;
+  gap: 0.5rem;
+}
+
+.grid-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.file-name-cell {
+  white-space: nowrap;
+}
+
+/* 文件名中间省略：head 截断省略 + tail（扩展名等）完整保留 */
+.mid-ellipsis {
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.me-head {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.me-tail {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* 大小/批次单行 */
+.nowrap {
+  white-space: nowrap;
+}
+
+/* Expandable row 错误详情：完整多行展示 */
+.error-detail {
+  color: var(--semantic-error-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 0.2rem 0.1rem;
+}
+
+/* 运行日志区：固定高度、内部滚动、等宽字体 */
+.log-section {
+  flex: none;
+  border-top: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  padding-top: 0.4rem;
+}
+
+.log-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.log-box {
+  height: 12rem;
+  overflow-y: auto;
+  background: var(--cds-alias-object-container-background-secondary, #fafafa);
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: 3px;
+  padding: 0.3rem 0.45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.55rem;
+  line-height: 1.5;
+}
+
+.log-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 预估Token 列头：按钮 + signpost 锚点 */
+.token-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.token-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--interactive-link-default);
+  cursor: pointer;
+}
+
+.token-btn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.token-btn:disabled {
+  color: var(--cds-alias-typography-color-400, #999);
+  cursor: default;
+}
+
+.token-anchor {
+  cursor: pointer;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.token-tip {
+  font-size: 0.55rem;
+  line-height: 1.5;
+  max-width: 12rem;
+}
+
+.token-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--cds-alias-typography-color-400, #999);
+}

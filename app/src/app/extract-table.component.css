@@ -1,0 +1,236 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ---- 操作工具行 ---- */
+.table-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.sel-count {
+  font-size: 0.55rem;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.toolbar-flex {
+  flex: 1;
+}
+
+/* 编辑模式按钮：进入后为紫色矩形实心 */
+.edit-mode-on {
+  background: var(--color-purple-600);
+  border-color: var(--color-purple-600);
+  color: #fff;
+}
+
+.edit-mode-on:hover {
+  background: var(--color-purple-700);
+  border-color: var(--color-purple-700);
+  color: #fff;
+}
+
+/* ---- 结果表格：固定高度，内部双向滚动 ---- */
+.extract-empty {
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.extract-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: var(--clr-base-border-radius-s, 0.15rem);
+}
+
+.extract-table {
+  margin-top: 0;
+  /* 表格宽度由组件按列宽之和显式给定（px），避免列多时引擎对
+     max-content/fixed 布局的歧义处理；列宽由表头 width 控制，可拖分隔线调整 */
+  table-layout: fixed;
+}
+
+.extract-table td {
+  vertical-align: top;
+  overflow: hidden;
+}
+
+/* 表头冻结（纵向滚动）+ datagrid 风格底色（与内容行区分）；
+   th 不裁剪（列宽拖动手柄超出右缘 1px 需可见） */
+.extract-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  overflow: visible;
+  vertical-align: top;
+  background: var(--cds-alias-object-container-background-shade, #f2f2f2);
+  color: var(--cds-alias-typography-color-500, #333);
+  border-bottom: 2px solid var(--cds-alias-object-border-color, #d9d9d9);
+}
+
+/* 冻结窗格：勾选列 + 文件名列横向冻结 */
+.col-check {
+  width: 32px;
+  left: 0;
+}
+
+.sticky-col {
+  position: sticky;
+  z-index: 3;
+  background: var(--cds-alias-object-container-background, #fff);
+  box-shadow: 1px 0 0 var(--cds-alias-object-border-color, #d9d9d9);
+}
+
+/* 冻结列与表头交叉处提高层级 + 表头底色 */
+.extract-table thead th.sticky-col {
+  z-index: 6;
+  background: var(--cds-alias-object-container-background-shade, #f2f2f2);
+}
+
+/* ---- 表头工具：排序 + 筛选（datagrid 风格图标按钮） ---- */
+.th-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.th-label {
+  margin-right: 0.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 未提取关键词列头提示（signpost 锚点：红色三角图标，弹层向左侧展开） */
+.unextracted-anchor {
+  cursor: pointer;
+  color: var(--semantic-error-text);
+  flex: none;
+}
+
+.unextracted-tip {
+  font-size: 0.55rem;
+  line-height: 1.5;
+  max-width: 12rem;
+}
+
+.th-icon {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0 0.05rem;
+  margin: 0;
+  cursor: pointer;
+  color: var(--cds-alias-typography-color-300, #aaa);
+}
+
+.th-icon:hover {
+  color: var(--interactive-primary-bg);
+}
+
+.th-icon.active {
+  color: var(--interactive-primary-bg);
+}
+
+/* 列间分隔线（可见，拖动调宽；与 Clarity datagrid 列分隔条一致） */
+.col-resize {
+  position: absolute;
+  top: 15%;
+  right: 0;
+  width: 5px;
+  height: 70%;
+  cursor: col-resize;
+  z-index: 7;
+  border-right: 2px solid var(--cds-alias-object-border-color, #ccc);
+}
+
+.col-resize:hover,
+.col-resize:active {
+  border-right-color: var(--interactive-primary-bg);
+}
+
+/* 筛选弹层 */
+.filter-pop {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.filter-pop input {
+  width: 9rem;
+}
+
+/* ---- 单元格 ---- */
+/* 文件名：多行完整显示（列收窄时继续换行，不截断） */
+.file-link {
+  white-space: normal;
+  word-break: break-all;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.file-name {
+  overflow: hidden;
+}
+
+.cell {
+  position: relative;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.cell.selected {
+  outline: 2px solid var(--interactive-primary-bg);
+  outline-offset: -2px;
+}
+
+.cell-value {
+  white-space: pre-wrap;
+}
+
+.cell-editor {
+  width: 100%;
+  min-width: 10rem;
+  resize: vertical;
+}
+
+.cell-edited-flag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 0.15rem;
+  font-size: 0.45rem;
+  line-height: 0.7rem;
+  color: var(--semantic-warning-text);
+  background: var(--semantic-warning-bg);
+  border-right: 1px solid var(--semantic-warning-border);
+  border-bottom: 1px solid var(--semantic-warning-border);
+}
+
+/* 存疑标记（未在原文命中但照常返回值）：红色，位置同「改」 */
+.cell-suspect-flag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 0.15rem;
+  font-size: 0.45rem;
+  line-height: 0.7rem;
+  color: var(--semantic-error-text);
+  background: var(--semantic-error-bg);
+  border-right: 1px solid var(--semantic-error-border);
+  border-bottom: 1px solid var(--semantic-error-border);
+}
+
+.muted {
+  color: var(--cds-alias-typography-color-400, #999);
+}

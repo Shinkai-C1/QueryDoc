@@ -1,0 +1,176 @@
+<app-modal
+  [open]="open()"
+  title="编辑关键词"
+  width="46rem"
+  [closable]="true"
+  (closed)="requestClose()"
+>
+  <p class="form-tip">
+    关键词必填；关键词定义与信息类型选填——将作为提示词注入提取请求以提高准确度，不填也可正常提取。
+  </p>
+  <div class="keyword-scroll" #keywordScroll>
+    <table class="table keyword-table">
+    <thead>
+      <tr>
+        <th class="left col-letter-cell">序号</th>
+        <th class="left">关键词（必填）</th>
+        <th class="left col-type">信息类型（选填）</th>
+        <th class="left col-op">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (c of cols(); track trackByCol($index, c); let i = $index) {
+        <tr class="kw-row">
+          <td class="left col-letter-cell" rowspan="2">{{ i + 1 }}</td>
+          <td class="left">
+            <div class="clr-input-wrapper keyword-cell">
+              <input
+                class="clr-input"
+                type="text"
+                placeholder="关键词"
+                name="keyword{{ c.columnIndex }}"
+                [ngModel]="c.keyword"
+                (ngModelChange)="updateKeyword(i, $event)"
+              />
+            </div>
+          </td>
+          <td class="left col-type">
+            <div class="clr-select-wrapper type-cell">
+              <select
+                class="clr-select"
+                name="infoType{{ c.columnIndex }}"
+                [ngModel]="c.infoType"
+                (ngModelChange)="updateInfoType(i, $event)"
+              >
+                @for (opt of infoTypeOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+          </td>
+          <td class="left col-op" rowspan="2">
+            <button
+              type="button"
+              class="btn btn-sm btn-danger-outline"
+              (click)="removeColumn(i)"
+            >
+              删除
+            </button>
+          </td>
+        </tr>
+        <tr class="def-row">
+          <td class="left" colspan="2">
+            <textarea
+              class="clr-textarea def-cell"
+              rows="2"
+              placeholder="关键词定义（选填，最多 200 字）：说明该关键词要提取什么，例如「指甲乙双方约定的含税总金额」"
+              name="definition{{ c.columnIndex }}"
+              [attr.maxlength]="definitionMaxChars"
+              [ngModel]="c.definition"
+              (ngModelChange)="updateDefinition(i, $event)"
+            ></textarea>
+          </td>
+        </tr>
+      }
+      @if (cols().length === 0) {
+        <tr>
+          <td colspan="4" class="left muted">暂无关键词，点击下方「添加关键词」。</td>
+        </tr>
+      }
+    </tbody>
+    </table>
+  </div>
+  <div class="add-row">
+    <button type="button" class="btn btn-sm add-col" (click)="addColumn()">
+      添加关键词
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-outline"
+      (click)="batchOpen.set(true); batchHint.set(null)"
+    >
+      批量添加
+    </button>
+    @if (batchHint(); as hint) {
+      <span class="batch-hint">{{ hint }}</span>
+    }
+  </div>
+  @if (keywordError(); as err) {
+    <div class="alert alert-danger" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <span class="alert-text">{{ err }}</span>
+        </div>
+      </div>
+    </div>
+  }
+  <div modalFooter>
+    <div class="save-col">
+      <button
+        type="button"
+        class="btn btn-sm btn-primary"
+        [disabled]="!dirty() || saving()"
+        (click)="save()"
+      >
+        {{ saving() ? "保存中…" : "保存关键词" }}
+      </button>
+      <!-- 成功提示在按钮下方出现（Clarity 打勾 icon），按钮本身不位移 -->
+      <span class="save-success" [class.invisible]="!savedHint() || dirty()">
+        <cds-icon shape="check" size="sm"></cds-icon>保存成功
+      </span>
+    </div>
+  </div>
+</app-modal>
+
+<!-- 批量添加（半角英文逗号分隔） -->
+<app-modal [open]="batchOpen()" title="批量添加关键词" width="30rem">
+  <p class="batch-tip">
+    输入以半角英文逗号（,）分隔的关键词组，例如：合同编号,甲方,金额
+  </p>
+  <textarea
+    class="clr-textarea batch-input"
+    rows="4"
+    name="batchKeywords"
+    [ngModel]="batchText()"
+    (ngModelChange)="batchText.set($event)"
+    placeholder="关键词1,关键词2,关键词3"
+  ></textarea>
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="batchOpen.set(false)">
+      取消
+    </button>
+    <button type="button" class="btn btn-sm btn-primary" (click)="applyBatch()">
+      添加
+    </button>
+  </div>
+</app-modal>
+
+<!-- 未保存修改确认（Clarity Alert-in-Modal，Warning 样式） -->
+<app-modal [open]="confirmOpen()" title="未保存的修改" width="26.5rem">
+  <div class="alert alert-warning" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <span class="alert-text">关键词已修改但未保存。</span>
+      </div>
+    </div>
+  </div>
+  <p>是否保存本次修改？选择「不保存」将维持当前已保存的关键词。</p>
+  <div modalFooter>
+    <button
+      type="button"
+      class="btn btn-sm btn-link"
+      [disabled]="saving()"
+      (click)="onConfirmDiscard()"
+    >
+      不保存
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-primary"
+      [disabled]="saving()"
+      (click)="onConfirmSave()"
+    >
+      {{ saving() ? "保存中…" : "保存" }}
+    </button>
+  </div>
+</app-modal>

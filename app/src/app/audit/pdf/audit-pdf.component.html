@@ -1,0 +1,164 @@
+<div class="pdf-toolbar">
+  <!-- 前进/后退导航栈（索引跳转历史） -->
+  <span class="toolbar-group">
+    <button
+      type="button"
+      class="btn btn-sm btn-link"
+      title="后退"
+      aria-label="后退"
+      [disabled]="!canBack()"
+      (click)="navBack()"
+    >
+      ←
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-link"
+      title="前进"
+      aria-label="前进"
+      [disabled]="!canForward()"
+      (click)="navForward()"
+    >
+      →
+    </button>
+  </span>
+  <span class="pdf-name" [title]="fileName()">{{ fileName() || "未选择文件" }}</span>
+  @if (pageCount() > 0) {
+    <span class="toolbar-group">
+      <button
+        type="button"
+        class="btn btn-sm btn-link"
+        [disabled]="currentPage() <= 1"
+        (click)="gotoPage(currentPage() - 1)"
+      >
+        ‹
+      </button>
+      <span class="page-ind">{{ currentPage() }} / {{ pageCount() }}</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-link"
+        [disabled]="currentPage() >= pageCount()"
+        (click)="gotoPage(currentPage() + 1)"
+      >
+        ›
+      </button>
+    </span>
+    <span class="toolbar-group">
+      <button type="button" class="btn btn-sm btn-link" (click)="zoomOut()">−</button>
+      <button
+        type="button"
+        class="btn btn-sm btn-link zoom-label"
+        title="恢复适合宽度"
+        (click)="fitWidth()"
+      >
+        {{ zoom() === null ? "适宽" : (lastScale() * 100).toFixed(0) + "%" }}
+      </button>
+      <button type="button" class="btn btn-sm btn-link" (click)="zoomIn()">＋</button>
+    </span>
+  }
+</div>
+
+<div class="viewer-scroll" #scrollRef>
+  @if (state.activeDocId() === null) {
+    <div class="viewer-placeholder">
+      <p>点击上方目录中的 PDF 预览</p>
+    </div>
+  } @else {
+    <!-- canvas 常驻挂载（加载/错误以覆盖层呈现），保证首渲染时机稳定 -->
+    <div class="canvas-wrap" #canvasWrap>
+      <canvas #pageCanvas></canvas>
+      <!-- 覆盖层：框选 + 索引/节点矩形（坐标 0–1000 归一化 → 该页 CSS 尺寸换算） -->
+      @if (pageCss(); as size) {
+        <div
+          class="overlay"
+          [style.width.px]="size.w"
+          [style.height.px]="size.h"
+          (mousedown)="onOverlayMouseDown($event)"
+          (mousemove)="onOverlayMouseMove($event)"
+          (mouseup)="onOverlayMouseUp($event)"
+        >
+          <!-- 已建制度索引矩形（可点击跳转目标 pdf） -->
+          @for (m of linkMarkers(); track m.id) {
+            <button
+              type="button"
+              class="link-marker"
+              [title]="'索引 → ' + m.targetName + '（点击跳转）'"
+              [style.left.px]="m.left"
+              [style.top.px]="m.top"
+              [style.width.px]="m.width"
+              [style.height.px]="m.height"
+              (click)="onMarkerClick(m.targetDocId)"
+              (mousedown)="$event.stopPropagation()"
+            >
+              <span class="link-glyph" aria-hidden="true">↗</span>
+            </button>
+          }
+          <!-- 已建节点来源矩形（点击 → 流程图定位选中） -->
+          @for (m of nodeMarkers(); track m.id) {
+            <button
+              type="button"
+              class="node-marker"
+              [class.selected]="m.selected"
+              [title]="'节点 ' + m.code"
+              [style.left.px]="m.left"
+              [style.top.px]="m.top"
+              [style.width.px]="m.width"
+              [style.height.px]="m.height"
+              (click)="onNodeMarkerClick(m.id)"
+              (mousedown)="$event.stopPropagation()"
+            ></button>
+          }
+          <!-- 拖动中的框选矩形 -->
+          @if (dragRect(); as r) {
+            <div
+              class="drag-rect"
+              [style.left.px]="r.x0 < r.x1 ? r.x0 : r.x1"
+              [style.top.px]="r.y0 < r.y1 ? r.y0 : r.y1"
+              [style.width.px]="(r.x1 - r.x0) < 0 ? (r.x0 - r.x1) : (r.x1 - r.x0)"
+              [style.height.px]="(r.y1 - r.y0) < 0 ? (r.y0 - r.y1) : (r.y1 - r.y0)"
+            ></div>
+          }
+          <!-- 驻留框选矩形（mouseup 后保留，取消/点他处才清除） -->
+          @if (!dragRect() && pendingCssRect(); as pr) {
+            <div
+              class="drag-rect sel-pending"
+              [style.left.px]="pr.left"
+              [style.top.px]="pr.top"
+              [style.width.px]="pr.width"
+              [style.height.px]="pr.height"
+            ></div>
+          }
+          <!-- 框选完成后的 mini 菜单 -->
+          @if (menuPos(); as pos) {
+            <app-mini-menu
+              [x]="pos.x"
+              [y]="pos.y"
+              [hostWidth]="size.w"
+              (addNode)="onMenuAddNode($event)"
+              (addLink)="onMenuAddLink()"
+              (dismiss)="dismissOverlays()"
+            />
+          }
+        </div>
+      }
+      <!-- 加载/错误覆盖层（不影响 canvas 挂载） -->
+      @if (loading()) {
+        <div class="canvas-overlay muted">PDF 加载中…</div>
+      } @else if (loadError(); as err) {
+        <div class="canvas-overlay viewer-error">
+          <p>{{ err }}</p>
+          <p>请再次点击文件名重试。</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- 制度索引目标选择 mini 窗口 -->
+@if (pickerOpen()) {
+  <app-doc-link-picker
+    (pick)="onPickLinkTarget($event)"
+    (cancelled)="dismissOverlays()"
+  />
+}
+

@@ -1,0 +1,105 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Clarity header 结构 + 藏青深色底白字（《前端颜色要求.md》blue-950）
+   品牌/导航/操作区统一 flex 垂直居中，三者同一水平线 */
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 2.4rem;
+  padding: 0 0.8rem;
+  background: var(--color-blue-950);
+  border-bottom: none;
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.branding .title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.header-nav .nav-link {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.header-nav .nav-link:hover,
+.header-nav .nav-link.active {
+  color: #fff;
+}
+
+.header-nav .nav-link.active {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* 设置按钮：垂直居中 + 齿轮 icon + 加大字号；
+   提高优先级覆盖 .btn.btn-link 的默认/hover 色，保证齿轮与文字效果一致 */
+.header-actions .settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0.15rem 0.2rem;
+  font-size: 0.65rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.settings-btn cds-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: inherit;
+}
+
+/* hover 与点击：齿轮、文字同时变白；点击加下压反馈 */
+.header-actions .settings-btn:hover,
+.header-actions .settings-btn:hover cds-icon {
+  color: #fff;
+}
+
+.header-actions .settings-btn:active,
+.header-actions .settings-btn:active cds-icon {
+  color: #fff;
+  opacity: 0.75;
+  transform: translateY(1px);
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+}

@@ -1,0 +1,207 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.page {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ---- 左栏：流程图区域（宽度可拖拽调整，默认 50%） ---- */
+.flow-pane {
+  flex: none;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 0.8rem;
+  overflow: hidden;
+}
+
+/* 右栏整体收起时：流程图区吃满剩余宽度，收起窄条贴到窗口最右缘 */
+.page.right-collapsed .flow-pane {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.audit-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.audit-header .btn {
+  margin: 0;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  height: auto;
+  min-height: 0;
+  padding: 0.1rem 0.3rem 0.1rem 0.1rem;
+  font-weight: 700;
+}
+
+.task-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.task-group {
+  font-size: 0.55rem;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+/* 页签填满剩余高度 */
+.flow-pane clr-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flow-pane clr-tabs ::ng-deep .tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.flow-pane clr-tabs ::ng-deep section {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.tab-fill {
+  height: 100%;
+}
+
+/* ---- 分栏拖拽条 ---- */
+.split-divider {
+  flex: none;
+  width: 5px;
+  cursor: col-resize;
+  background: transparent;
+}
+
+.split-divider:hover {
+  background: #a8cdfa;
+}
+
+/* ---- 右栏：垂直两区（上目录 / 下 PDF）；整体可向右收起为窄条 ---- */
+.right-col {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+}
+
+.right-col.collapsed {
+  flex: none;
+  width: 2rem;
+  min-width: 2rem;
+  align-items: center;
+  background: var(--cds-alias-object-container-background-shade, #fafafa);
+}
+
+.right-expand-btn {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0.4rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-weight: 700;
+  overflow: visible;
+  white-space: normal;
+}
+
+.right-expand-btn .expand-arrow {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.right-expand-btn .expand-text {
+  writing-mode: vertical-rl;
+  font-size: 0.55rem;
+  letter-spacing: 0.1rem;
+}
+
+.col-collapse-btn {
+  margin: 0;
+  min-width: 0;
+  padding: 0 0.15rem;
+  font-weight: 700;
+}
+
+/* 制度文件目录（右上，可滚动、紧凑；向上收起仅余标题行） */
+.tree-pane {
+  flex: none;
+  height: 34%;
+  min-height: 6rem;
+  max-height: 55%;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  overflow: hidden;
+}
+
+.tree-pane.collapsed {
+  height: 1.6rem;
+  min-height: 1.6rem;
+  background: var(--cds-alias-object-container-background-shade, #fafafa);
+}
+
+.tree-pane-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.3rem 0 0.35rem;
+  height: 1.6rem;
+  border-bottom: 1px solid var(--cds-alias-object-border-color, #eee);
+}
+
+.tree-pane-header .btn {
+  margin: 0;
+  min-width: 0;
+  padding: 0 0.2rem;
+  font-size: 0.55rem;
+}
+
+.tree-pane-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.header-spacer {
+  flex: 1;
+}
+
+.tree-pane app-doc-tree {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* PDF 预览（右下，占满剩余空间） */
+.pdf-pane {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}

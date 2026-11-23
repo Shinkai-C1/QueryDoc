@@ -1,0 +1,140 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.list-page {
+  height: 100%;
+  overflow-y: auto;
+  padding: 0.6rem 0.8rem;
+}
+
+/* ---- 工具行：左新增任务、右搜索 ---- */
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.list-toolbar-flex {
+  flex: 1;
+}
+
+.search-box input {
+  width: 12rem;
+}
+
+/* ---- 任务表格 ---- */
+.task-table {
+  margin-top: 0;
+}
+
+.task-name {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time-cell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 表头排序按钮（纯文本，无图标） */
+.th-sort {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+}
+
+.th-sort:hover {
+  color: var(--interactive-primary-bg);
+}
+
+.th-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* 所属项目筛选下拉 */
+.group-filter {
+  font-size: 0.55rem;
+  max-width: 7rem;
+  height: 1.1rem;
+  padding: 0 0.2rem;
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: var(--clr-base-border-radius-s, 0.15rem);
+  background: var(--cds-alias-object-container-background, #fff);
+  color: inherit;
+}
+
+/* ---- 分页 ---- */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.5rem;
+  font-size: 0.6rem;
+}
+
+.pagination-flex {
+  flex: 1;
+}
+
+.page-current {
+  color: var(--interactive-primary-bg);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.muted {
+  color: var(--cds-alias-typography-color-400, #999);
+}
+
+/* 状态列：label+badge 横排换行 */
+.status-cell .label {
+  margin: 0 0.25rem 0.1rem 0;
+}
+
+/* 任务记录行内容垂直居中 */
+.task-table td {
+  vertical-align: middle;
+}
+
+.empty-state {
+  margin-top: 2rem;
+  text-align: center;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+/* 新增任务 modal 内的目录选择行 */
+.dir-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.picked-dir {
+  font-size: 0.55rem;
+  color: var(--cds-alias-typography-color-400, #666);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 16rem;
+}
+
+/* 所属项目 combobox：input-wrapper 的行高 strut 会把内联级 combobox
+   下推约一行高度，改块级消除，与任务名称输入框的标题间距对齐 */
+.clr-input-wrapper clr-combobox {
+  display: block;
+  margin-top: 0;
+}

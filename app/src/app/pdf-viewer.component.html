@@ -1,0 +1,97 @@
+<div class="viewer-toolbar">
+  @if (fileName()) {
+    @let parts = fileName() | midEllipsis;
+    <span class="viewer-file" [title]="fileName()">
+      <span class="me-head">{{ parts.head }}</span>
+      @if (parts.tail) {
+        <span class="me-tail">{{ parts.tail }}</span>
+      }
+    </span>
+  }
+  <span class="toolbar-spacer"></span>
+  <!-- 页码在工具栏绝对居中（不受两侧内容宽度影响） -->
+  <span class="page-indicator">第 {{ currentPage() }} / {{ pageCount() || "-" }} 页</span>
+  <!-- 缩放：Clarity 按钮组 + icon -->
+  <div class="btn-group zoom-group">
+    <button
+      type="button"
+      class="btn btn-sm"
+      [disabled]="pageCount() === 0"
+      title="缩小"
+      aria-label="缩小"
+      (click)="zoomOut()"
+    >
+      <cds-icon shape="zoom-out" size="sm"></cds-icon>
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm"
+      [disabled]="pageCount() === 0"
+      title="放大"
+      aria-label="放大"
+      (click)="zoomIn()"
+    >
+      <cds-icon shape="zoom-in" size="sm"></cds-icon>
+    </button>
+  </div>
+  <button
+    type="button"
+    class="btn btn-sm reset-zoom-btn"
+    [disabled]="pageCount() === 0 || zoom() === null"
+    title="重置为适合宽度"
+    (click)="resetZoom()"
+  >
+    重置缩放
+  </button>
+  <button
+    type="button"
+    class="btn btn-sm btn-link collapse-btn"
+    title="收起 PDF 窗格"
+    (click)="collapse()"
+  >
+    <span class="collapse-arrow">&gt;</span>收起
+  </button>
+</div>
+
+<!-- 整区点击用于取消选中等交互，非独立控件，豁免 a11y 规则 -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+<div class="viewer-scroll" #scrollRef (click)="onViewerClick()" (scroll)="onScroll()">
+  @if (loading()) {
+    <div class="viewer-placeholder">PDF 加载中…</div>
+  } @else if (loadError(); as err) {
+    <div class="viewer-placeholder viewer-error">
+      <p>{{ err }}</p>
+      <p>请再次点击文件名重试。</p>
+    </div>
+  } @else if (state.pdfSourceFileId() === null) {
+    <div class="viewer-placeholder">
+      <p>点击表格中的文件名预览对应 PDF；</p>
+      <p>点击带坐标的单元格跳转到原文位置。</p>
+    </div>
+  }
+
+  <!-- 全页连续滚动：每页一个 wrap，进入视口才渲染 -->
+  @for (n of pages(); track n) {
+    <div
+      class="page-wrap"
+      #pageWrap
+      [attr.data-page]="n"
+      [style.min-height.px]="pageSizes().get(n)?.h ?? 700"
+    >
+      <canvas #pageCanvas></canvas>
+      @if (highlightPage() === n) {
+        <!-- 选中态：红框 + 淡黄底（低透明度，常显不闪烁） -->
+        @for (r of highlightRects(); track $index) {
+          <div
+            class="hl hl-selection"
+            [style.left.px]="r.left"
+            [style.top.px]="r.top"
+            [style.width.px]="r.width"
+            [style.height.px]="r.height"
+          ></div>
+        }
+      }
+    </div>
+  }
+</div>
+

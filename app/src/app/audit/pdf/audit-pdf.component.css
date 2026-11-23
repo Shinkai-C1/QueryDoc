@@ -1,0 +1,157 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.pdf-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-bottom: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+}
+
+.pdf-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.6rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.05rem;
+}
+
+.toolbar-group .btn {
+  margin: 0;
+  min-width: 0;
+  padding: 0 0.25rem;
+}
+
+.page-ind {
+  font-size: 0.6rem;
+  min-width: 2.6rem;
+  text-align: center;
+}
+
+.zoom-label {
+  font-size: 0.55rem;
+}
+
+.viewer-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.8rem;
+}
+
+.canvas-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.canvas-wrap canvas {
+  display: block;
+}
+
+/* 覆盖层：与画布同尺寸，承载框选与索引矩形 */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: crosshair;
+}
+
+/* 拖动中的框选矩形 + 驻留框选矩形：蓝色虚线 + 浅蓝底 */
+.drag-rect {
+  position: absolute;
+  border: 1px dashed #0064dd;
+  background: rgba(0, 100, 221, 0.08);
+  pointer-events: none;
+}
+
+/* 驻留态略加重，表明等待 mini 菜单选择 */
+.sel-pending {
+  border-width: 1.5px;
+  background: rgba(0, 100, 221, 0.12);
+}
+
+/* 加载/错误覆盖层（绝对覆盖在画布区域上，不影响 canvas 挂载） */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 0.7rem;
+  z-index: 5;
+}
+
+/* 制度索引标记：紫色边框浅紫底 + 紧凑 ↗ 角标，可点击 */
+.link-marker {
+  position: absolute;
+  border: 1.5px solid #7a00dd;
+  background: rgba(169, 57, 250, 0.12);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.link-marker:hover {
+  background: rgba(169, 57, 250, 0.26);
+  box-shadow: 0 0 0 1.5px rgba(101, 0, 184, 0.4);
+}
+
+.link-glyph {
+  font-size: 0.42rem;
+  font-weight: 700;
+  color: #fff;
+  background: #6500b8;
+  line-height: 1;
+  padding: 0.03rem 0.1rem;
+  border-radius: 0 0 0 2px;
+}
+
+/* 节点来源矩形：蓝色边框浅底，选中态加粗 */
+.node-marker {
+  position: absolute;
+  border: 1.5px solid #0064dd;
+  background: rgba(0, 100, 221, 0.1);
+  cursor: pointer;
+  padding: 0;
+}
+
+.node-marker:hover {
+  background: rgba(0, 100, 221, 0.22);
+}
+
+.node-marker.selected {
+  border-width: 2.5px;
+  background: rgba(0, 100, 221, 0.25);
+  box-shadow: 0 0 0 2px rgba(0, 100, 221, 0.35);
+}
+
+.viewer-placeholder {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--cds-alias-typography-color-400, #666);
+  font-size: 0.7rem;
+}
+
+.viewer-error {
+  color: var(--cds-alias-status-danger, #c92100);
+}

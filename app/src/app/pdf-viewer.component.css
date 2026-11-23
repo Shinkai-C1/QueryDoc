@@ -1,0 +1,135 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  /* 与左侧 .content 顶部 padding 一致，使工具栏与任务头部同一水平线 */
+  padding-top: 0.6rem;
+  box-sizing: border-box;
+  border-left: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  background: var(--cds-alias-object-container-background-shade, #f4f4f4);
+}
+
+.viewer-toolbar {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  /* 与左侧 .task-header 同高，内容垂直居中 */
+  height: 1.5rem;
+  box-sizing: border-box;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  background: var(--cds-alias-object-container-background, #fff);
+  font-size: 0.6rem;
+  white-space: nowrap;
+}
+
+.viewer-file {
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+  font-weight: 600;
+  max-width: 12rem;
+}
+
+/* 中间省略的两段在全局 pipe 样式中复用：head 截断、tail 保留 */
+.viewer-file .me-head {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viewer-file .me-tail {
+  flex: none;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+/* 页码：工具栏水平绝对居中，与缩放按钮组拉开距离 */
+.page-indicator {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+/* 缩放按钮组（Clarity btn-group + icon） */
+.zoom-group {
+  display: inline-flex;
+}
+
+.zoom-group .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  padding: 0 0.2rem;
+  margin: 0;
+}
+
+/* 重置缩放：与缩放按钮同款的 btn-sm 样式（仅文字） */
+.reset-zoom-btn {
+  margin: 0;
+}
+
+/* 收起按钮（横向「> 收起」，覆盖 btn-sm 固定高度防裁剪） */
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  height: auto;
+  min-height: 0;
+  padding: 0.1rem 0.3rem;
+  font-weight: 700;
+}
+
+.collapse-arrow {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.viewer-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 0.4rem;
+}
+
+.viewer-placeholder {
+  margin-top: 2.5rem;
+  text-align: center;
+  color: var(--cds-alias-typography-color-400, #666);
+  font-size: 0.65rem;
+}
+
+.viewer-error {
+  color: var(--semantic-error-text);
+}
+
+/* 连续滚动的单页容器：未渲染时以 min-height 占位，渲染后贴合 canvas */
+.page-wrap {
+  position: relative;
+  margin: 0 auto 0.5rem;
+  width: fit-content;
+  background: var(--cds-alias-object-app-background, #ffffff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.page-wrap canvas {
+  display: block;
+}
+
+/* 高亮叠加层：页 wrap 内绝对定位 div（非 SVG），随页面滚动/缩放 */
+.hl {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* 选中态：红框 + 低透明度淡黄底（常显，不影响文字阅读） */
+.hl-selection {
+  border: 2px solid var(--pdf-selection-border);
+  background: var(--pdf-highlight-bg);
+}

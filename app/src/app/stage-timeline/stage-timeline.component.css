@@ -1,0 +1,137 @@
+.timeline-wrap {
+  margin-bottom: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--cds-alias-object-border-color, #d9d9d9);
+  border-radius: var(--clr-base-border-radius-s, 0.15rem);
+  background: var(--cds-alias-object-container-background, #fff);
+}
+
+/* 框内顶行：alert 宽度填满 + 查看具体进度按钮靠右 */
+.timeline-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-top .export-alert {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.progress-btn {
+  flex: none;
+  margin-left: auto;
+}
+
+/* 成功 alert 内 ✕：合适大小、垂直居中 */
+.alert-close-x {
+  flex: none;
+  align-self: center;
+  border: none;
+  background: none;
+  padding: 0 0.2rem;
+  font-size: 0.65rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+
+.timeline-wrap .clr-timeline {
+  padding: 0;
+}
+
+/* clr-ui 节点默认 min-width:175px，PDF 窗格展开时 5 节点总宽超出框线；
+   允许收缩，节点内容远小于该值 */
+.timeline-wrap .clr-timeline-step {
+  min-width: 0;
+}
+
+/* clr-ui 节点连接线（body::before）原本占据文档流 2px，导致末节点（无连接线）
+   与其余节点内容错位 2px——改为绝对定位脱离文档流，五节点完全同位 */
+.clr-timeline-step-body {
+  position: relative;
+}
+
+.clr-timeline-step:not(:last-of-type) .clr-timeline-step-body::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* 节点状态图标统一占位：spinner 与图标同盒居中，状态切换不引起位移 */
+.clr-timeline-step > cds-icon {
+  flex: none;
+}
+
+.step-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex: none;
+}
+
+/* 节点描述行：按钮在上、进度提示行在下常驻占位（固定行高），
+   状态切换（数字/提示出现或消失）不引起上下位移。
+   全部左对齐：图标、节点名称、按钮、进度提示共用同一条左缘垂直轴 */
+.clr-timeline-step-description {
+  text-align: left;
+}
+
+.step-numbers {
+  position: relative;
+  display: block;
+  height: 0.9rem;
+  line-height: 0.9rem;
+  margin-top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--cds-alias-typography-color-400, #666);
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+/* 过期提示图标槽位：行内流紧跟数字文本右侧（signpost 锚点需要文档流内
+   的 anchor 才能正确定位弹层；左轴对齐下图标出现/消失不挤动其他元素） */
+.stale-slot {
+  display: inline-flex;
+  margin-left: 0.15rem;
+  vertical-align: middle;
+}
+
+/* 过期提示 signpost 锚点图标 */
+.stale-anchor {
+  cursor: pointer;
+  color: var(--semantic-error-text);
+}
+
+.stale-tip {
+  font-size: 0.55rem;
+  line-height: 1.5;
+  max-width: 12rem;
+}
+
+/* 导出下拉：ClrDropdown 组件（触发/定位/外点关闭自管）。
+   垂直间距与其他节点按钮一致：描述行内按钮规则是 display:block + margin-top: gap-s，
+   此处对外层组件按同 token 补齐 */
+clr-dropdown {
+  display: block;
+  margin-top: var(--clr-base-gap-s, 0.4rem);
+  margin-bottom: var(--clr-base-vertical-offset-s, 0.2rem);
+}
+
+.dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.dropdown-item {
+  text-align: left;
+  white-space: nowrap;
+}

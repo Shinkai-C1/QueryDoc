@@ -1,0 +1,372 @@
+@if (state.files().length === 0) {
+  <div class="extract-empty">
+    <p>还没有上传文件。点击顶部时间线「上传文件」添加 PDF。</p>
+  </div>
+} @else {
+  <!-- 操作按钮组（选中行后可用）+ 编辑模式开关 -->
+  <div class="table-toolbar">
+    <div class="btn-group">
+      <button
+        type="button"
+        class="btn btn-sm btn-danger-outline"
+        [disabled]="selectedIds().size === 0 || rerunning() || state.busy()"
+        (click)="deleteOpen.set(true)"
+      >
+        删除文件
+      </button>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline"
+        [disabled]="selectedIds().size === 0 || rerunning() || state.busy()"
+        (click)="askRerun('parse')"
+      >
+        重新解析
+      </button>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline"
+        [disabled]="selectedIds().size === 0 || rerunning() || state.busy()"
+        (click)="askRerun('extract')"
+      >
+        重新提取
+      </button>
+      <button
+        type="button"
+        class="btn btn-sm btn-danger-outline"
+        [disabled]="state.busy()"
+        (click)="resetOpen.set(true)"
+      >
+        全部重置
+      </button>
+    </div>
+    @if (selectedIds().size > 0) {
+      <span class="sel-count">已选 {{ selectedIds().size }} 行</span>
+    }
+    <span class="toolbar-flex"></span>
+    <button
+      type="button"
+      class="btn btn-sm btn-outline"
+      [disabled]="!hasCustomWidths()"
+      title="清除手动调整的列宽，恢复默认"
+      (click)="resetColWidths()"
+    >
+      重置列宽
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm edit-mode-btn"
+      [class.btn-outline]="!editMode()"
+      [class.edit-mode-on]="editMode()"
+      (click)="toggleEditMode()"
+    >
+      {{ editMode() ? "退出编辑" : "编辑模式" }}
+    </button>
+  </div>
+
+  <div class="extract-scroll">
+    <table class="table extract-table" [style.width.px]="tableWidth()">
+      <thead>
+        <tr>
+          <th class="left col-check sticky-col">
+            <input
+              type="checkbox"
+              aria-label="全选"
+              [checked]="allChecked()"
+              (change)="toggleAll()"
+            />
+          </th>
+          <th
+            class="left sticky-col"
+            [style.width.px]="colWidthOf('file')"
+            [style.left.px]="leftOfFile()"
+          >
+            <span class="th-tools">
+              <span class="th-label">文件名</span>
+              <button
+                type="button"
+                class="th-icon"
+                [class.active]="sortDirection('file') !== null"
+                aria-label="按文件名排序"
+                (click)="toggleSort('file')"
+              >
+                @if (sortDirection('file'); as dir) {
+                  <cds-icon shape="arrow" [attr.direction]="dir" size="sm"></cds-icon>
+                } @else {
+                  <cds-icon shape="two-way-arrows" direction="left" size="sm"></cds-icon>
+                }
+              </button>
+              <!-- 筛选弹层：Clarity 官方 Signpost（下方展开，开关自管） -->
+              <clr-signpost>
+                <button
+                  type="button"
+                  class="th-icon"
+                  [class.active]="hasFilter('file')"
+                  aria-label="筛选文件名"
+                  clrSignpostTrigger
+                >
+                  <cds-icon shape="filter" size="sm"></cds-icon>
+                </button>
+                <clr-signpost-content clrPosition="bottom-left" *clrIfOpen>
+                  <div class="filter-pop">
+                    <input
+                      class="clr-input"
+                      type="text"
+                      name="fFile"
+                      [ngModel]="filters()['file'] ?? ''"
+                      (ngModelChange)="setFilter('file', $event)"
+                      placeholder="包含…"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link"
+                      (click)="setFilter('file', '')"
+                    >
+                      清除
+                    </button>
+                  </div>
+                </clr-signpost-content>
+              </clr-signpost>
+            </span>
+            <span class="col-resize" (mousedown)="startResize('file', $event)"></span>
+          </th>
+          @for (c of savedCols(); track trackByCol($index, c)) {
+            <th class="left" [style.width.px]="colWidthOf(colKey(c))">
+              <span class="th-tools">
+                <span class="th-label" [attr.title]="colTooltip(c)">{{
+                  c.keyword
+                }}</span
+                >
+                @if (unextractedCols().has(c.columnIndex)) {
+                  <!-- 提取后新增、尚未提取的关键词：列头文字右侧 signpost 提示。
+                       Clarity Angular 官方组件：clrPosition=left-bottom（弹层在
+                       图标左下方、指向箭头自动对准图标） -->
+                  <clr-signpost>
+                    <cds-icon
+                      clrSignpostTrigger
+                      class="unextracted-anchor"
+                      shape="exclamation-triangle"
+                      size="sm"
+                      role="button"
+                      tabindex="0"
+                      [attr.aria-label]="'关键词 ' + c.keyword + ' 尚未提取'"
+                    ></cds-icon>
+                    <clr-signpost-content clrPosition="left-bottom" *clrIfOpen>
+                      <div class="unextracted-tip">
+                        该关键词为提取后新增，尚未参与提取；重新提取后生效
+                      </div>
+                    </clr-signpost-content>
+                  </clr-signpost>
+                }
+                <button
+                  type="button"
+                  class="th-icon"
+                  [class.active]="sortDirection(colKey(c)) !== null"
+                  [attr.aria-label]="'按 ' + c.keyword + ' 排序'"
+                  (click)="toggleSort(colKey(c))"
+                >
+                  @if (sortDirection(colKey(c)); as dir) {
+                    <cds-icon shape="arrow" [attr.direction]="dir" size="sm"></cds-icon>
+                  } @else {
+                    <cds-icon shape="two-way-arrows" direction="left" size="sm"></cds-icon>
+                  }
+                </button>
+                <clr-signpost>
+                  <button
+                    type="button"
+                    class="th-icon"
+                    [class.active]="hasFilter(colKey(c))"
+                    [attr.aria-label]="'筛选 ' + c.keyword"
+                    clrSignpostTrigger
+                  >
+                    <cds-icon shape="filter" size="sm"></cds-icon>
+                  </button>
+                  <clr-signpost-content clrPosition="bottom-right" *clrIfOpen>
+                    <div class="filter-pop">
+                      <input
+                        class="clr-input"
+                        type="text"
+                        name="fCol{{ c.columnIndex }}"
+                        [ngModel]="filters()[colKey(c)] ?? ''"
+                        (ngModelChange)="setFilter(colKey(c), $event)"
+                        placeholder="包含…"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-link"
+                        (click)="setFilter(colKey(c), '')"
+                      >
+                        清除
+                      </button>
+                    </div>
+                  </clr-signpost-content>
+                </clr-signpost>
+              </span>
+              <span class="col-resize" (mousedown)="startResize(colKey(c), $event)"></span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of viewRows(); track trackByFileId($index, row)) {
+          <tr>
+            <td class="left col-check sticky-col">
+              <input
+                type="checkbox"
+                aria-label="选择该行"
+                [checked]="isChecked(row.file.id)"
+                (change)="toggleRow(row.file.id)"
+              />
+            </td>
+            <td class="left sticky-col" [style.left.px]="leftOfFile()">
+              <div class="file-name" [title]="row.file.original_name">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link file-link"
+                  (click)="openRowPdf(row)"
+                >
+                  {{ row.file.original_name }}
+                </button>
+              </div>
+            </td>
+            @for (c of savedCols(); track trackByCol($index, c)) {
+              <td
+                class="left cell"
+                [class.selected]="isSelected(row, c.columnIndex)"
+                (click)="onCellClick(row, c.columnIndex)"
+                (dblclick)="startEdit(row, c.columnIndex)"
+              >
+                @if (row.result) {
+                  @if (editingKey() === keyOf(row, c.columnIndex)) {
+                    <!-- eslint-disable @angular-eslint/template/no-autofocus -->
+                    <textarea
+                      class="clr-textarea cell-editor"
+                      rows="3"
+                      name="cell{{ row.result.id }}-{{ c.columnIndex }}"
+                      [ngModel]="editValue()"
+                      (ngModelChange)="editValue.set($event)"
+                      (keydown.control.enter)="onEditorCtrlEnter($event)"
+                      (keydown.escape)="cancelEdit()"
+                      (blur)="commitEdit()"
+                      title="Ctrl+Enter 或失焦保存，Esc 取消"
+                      autofocus
+                    ></textarea>
+                    <!-- eslint-enable @angular-eslint/template/no-autofocus -->
+                  } @else {
+                    <span class="cell-value">{{
+                      cellOf(row, c.columnIndex)?.value || ""
+                    }}</span>
+                    @if (cellOf(row, c.columnIndex)?.suspect && cellOf(row, c.columnIndex)?.value) {
+                      <span class="cell-suspect-flag" title="未能在原文定位来源，请人工核对">疑</span>
+                    } @else if (sessionEdited().has(keyOf(row, c.columnIndex))) {
+                      <span class="cell-edited-flag">改</span>
+                    }
+                  }
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+            }
+          </tr>
+        }
+        @if (viewRows().length === 0) {
+          <tr>
+            <td class="left muted" [attr.colspan]="savedCols().length + 2">
+              没有匹配筛选条件的行。
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- 重跑确认（Warning；标题与操作一致） -->
+<app-modal
+  [open]="rerunKind() !== null"
+  [title]="rerunKind() === 'parse' ? '重新解析' : '重新提取'"
+  width="26.5rem"
+>
+  <div class="alert alert-warning" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        @if (rerunKind() === "parse") {
+          <span class="alert-text">
+            将对选中的 {{ selectedFileIds().length }} 个文件重新解析，并同时清除这些文件的提取结果。
+          </span>
+        } @else {
+          <span class="alert-text">
+            将对选中的 {{ selectedFileIds().length }} 个文件重新提取（按当前已保存的关键词）。
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+  <p>确定继续吗？</p>
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="rerunKind.set(null)">
+      取消
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-primary"
+      [disabled]="rerunning()"
+      (click)="confirmRerun()"
+    >
+      {{ rerunning() ? "处理中…" : "确定" }}
+    </button>
+  </div>
+</app-modal>
+
+<!-- 删除文件确认（Warning） -->
+<app-modal [open]="deleteOpen()" title="删除文件" width="26.5rem">
+  <div class="alert alert-warning" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <span class="alert-text">
+          将删除选中的 {{ selectedFileIds().length }} 个上传文件，其解析结果、提取结果一并删除（磁盘文件同时移除）。
+        </span>
+      </div>
+    </div>
+  </div>
+  <p>确定继续吗？</p>
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="deleteOpen.set(false)">
+      取消
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-danger"
+      [disabled]="rerunning()"
+      (click)="confirmDeleteFiles()"
+    >
+      {{ rerunning() ? "处理中…" : "删除" }}
+    </button>
+  </div>
+</app-modal>
+
+<!-- 全部重置确认（Warning） -->
+<app-modal [open]="resetOpen()" title="全部重置" width="26.5rem">
+  <div class="alert alert-warning" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <span class="alert-text">
+          将删除全部上传文件、解析结果、提取结果、导出记录与关键词配置，任务恢复到刚创建的状态。
+        </span>
+      </div>
+    </div>
+  </div>
+  <p>确定要全部重置吗？</p>
+  <div modalFooter>
+    <button type="button" class="btn btn-sm btn-link" (click)="resetOpen.set(false)">
+      取消
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-danger"
+      [disabled]="state.busy()"
+      (click)="confirmReset()"
+    >
+      全部重置
+    </button>
+  </div>
+</app-modal>

@@ -1,0 +1,166 @@
+@if (node(); as n) {
+  <div class="props-panel">
+    <div class="panel-header">
+      <span class="panel-title">节点属性 — {{ n.code }}</span>
+      <button type="button" class="btn btn-sm btn-link" aria-label="关闭属性面板" (click)="close()">
+        ✕
+      </button>
+    </div>
+
+    <div class="panel-body">
+      <div class="prop-row">
+        <span class="prop-label">节点类型</span>
+        <span>{{ typeLabel(n) }}{{ n.subtype ? " / " + n.subtype : "" }}</span>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">编号</span>
+        <span class="mono">{{ n.code }}</span>
+      </div>
+
+      <div class="prop-field">
+        <label class="prop-label" for="np-name">名称</label>
+        <div class="clr-input-wrapper">
+          <input
+            id="np-name"
+            type="text"
+            class="clr-input"
+            [ngModel]="nameDraft()"
+            (ngModelChange)="nameDraft.set($event)"
+            (blur)="saveName()"
+            (keydown.enter)="$any($event.target).blur()"
+          />
+        </div>
+      </div>
+
+      <div class="prop-field">
+        <label class="prop-label" for="np-content">内容（OCR 填入，可改）</label>
+        <textarea
+          id="np-content"
+          class="clr-textarea"
+          rows="4"
+          [ngModel]="contentDraft()"
+          (ngModelChange)="contentDraft.set($event)"
+          (blur)="saveContent()"
+        ></textarea>
+      </div>
+
+      <div class="prop-row">
+        <span class="prop-label">来源制度</span>
+        @if (sourceLabel(); as src) {
+          <button type="button" class="btn btn-sm btn-link source-link" (click)="gotoSource()">
+            {{ src }}
+          </button>
+        } @else {
+          <span class="muted">无（画布直接创建）</span>
+        }
+      </div>
+
+      @if (n.node_type === "ACT") {
+        <div class="prop-section">控制属性</div>
+        <div class="prop-row">
+          <span class="prop-label">控制性质</span>
+          <div class="clr-select-wrapper">
+            <select
+              class="clr-select"
+              aria-label="控制性质"
+              [ngModel]="actProps().control_nature ?? ''"
+              (ngModelChange)="setProp('control_nature', $event)"
+            >
+              <option value="">未设置</option>
+              @for (o of natures; track o) {
+                <option [value]="o">{{ o }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">预防/检查</span>
+          <div class="clr-select-wrapper">
+            <select
+              class="clr-select"
+              aria-label="预防或检查"
+              [ngModel]="actProps().preventive_or_detective ?? ''"
+              (ngModelChange)="setProp('preventive_or_detective', $event)"
+            >
+              <option value="">未设置</option>
+              @for (o of preventiveDetective; track o) {
+                <option [value]="o">{{ o }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">控制频率</span>
+          <div class="clr-select-wrapper">
+            <select
+              class="clr-select"
+              aria-label="控制频率"
+              [ngModel]="actProps().frequency ?? ''"
+              (ngModelChange)="setProp('frequency', $event)"
+            >
+              <option value="">未设置</option>
+              @for (o of frequencies; track o) {
+                <option [value]="o">{{ o }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">关键控制</span>
+          <div class="clr-select-wrapper">
+            <select
+              class="clr-select"
+              aria-label="是否关键控制"
+              [ngModel]="actProps().is_key ?? ''"
+              (ngModelChange)="setProp('is_key', $event)"
+            >
+              <option value="">未设置</option>
+              @for (o of yesNo; track o) {
+                <option [value]="o">{{ o === "Y" ? "是" : "否" }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">应对特别风险</span>
+          <div class="clr-select-wrapper">
+            <select
+              class="clr-select"
+              aria-label="是否应对特别风险"
+              [ngModel]="actProps().is_special_risk ?? ''"
+              (ngModelChange)="setProp('is_special_risk', $event)"
+            >
+              <option value="">未设置</option>
+              @for (o of yesNo; track o) {
+                <option [value]="o">{{ o === "Y" ? "是" : "否" }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="prop-row">
+          <span class="prop-label">相关角色</span>
+          <span>
+            @if (related().roles.length === 0) {
+              <span class="muted">无</span>
+            }
+            @for (r of related().roles; track r) {
+              <span class="rel-chip">{{ r }}</span>
+            }
+          </span>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">相关数据</span>
+          <span>
+            @if (related().data.length === 0) {
+              <span class="muted">无</span>
+            }
+            @for (d of related().data; track d) {
+              <span class="rel-chip">{{ d }}</span>
+            }
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+}

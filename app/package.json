@@ -1,0 +1,58 @@
+{
+  "name": "querydoc",
+  "version": "0.0.12",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "tauri": "tauri"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^21.2.22",
+    "@angular/cdk": "^21.2.14",
+    "@angular/common": "^21.2.22",
+    "@angular/compiler": "^21.2.22",
+    "@angular/core": "^21.2.22",
+    "@angular/forms": "^21.2.22",
+    "@angular/platform-browser": "^21.2.22",
+    "@angular/router": "^21.2.22",
+    "@cds/core": "^6.17.0",
+    "@clr/angular": "^18.3.0",
+    "@clr/ui": "18.3.0",
+    "@foblex/flow": "^19.1.7",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.7.3",
+    "@tauri-apps/plugin-opener": "^2",
+    "graphology": "^0.26.0",
+    "pdfjs-dist": "^6.3.289",
+    "rxjs": "~7.8.2",
+    "sigma": "^3.0.3",
+    "tslib": "^2.8.1",
+    "zone.js": "~0.15.1"
+  },
+  "devDependencies": {
+    "@angular-eslint/builder": "21.4.0",
+    "@angular/build": "^21.2.22",
+    "@angular/cli": "^21.2.22",
+    "@angular/compiler-cli": "^21.2.22",
+    "@tauri-apps/cli": "^2",
+    "angular-eslint": "21.4.0",
+    "eslint": "^9.39.5",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.0"
+  },
+  "packageManager": "pnpm@11.25.0+sha512.5cde925b4f075f725eb71fbae18a42ffe784524789f19b61c731cb8721ec28aaee160e01a8d5af4fedb2a42cdbf300efe23db356b0d4a17b4d63e11f8ab7c956",
+  "description": "QueryDoc：扫描合同 PDF 的离线 OCR + LLM 信息提取桌面应用（Tauri v2 + Angular）",
+  "author": "QueryDoc contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/QueryDoc.git"
+  },
+  "homepage": "https://github.com/your-org/QueryDoc"
+}

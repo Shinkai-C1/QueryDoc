@@ -1,0 +1,59 @@
+<div class="page">
+  <!-- 中栏：任务头部 / 五阶段时间线 / 提取结果表格 -->
+  <section class="content">
+    <div class="task-header">
+      <button type="button" class="btn btn-sm btn-link back-btn" (click)="goBack()">
+        <cds-icon shape="arrow" direction="left" class="back-arrow"></cds-icon>返回 至 任务页面
+      </button>
+      @if (state.selectedProject(); as proj) {
+        <span class="task-title">{{ proj.name }}</span>
+        <span class="task-group">{{ proj.group_name }}</span>
+      }
+      <span class="header-spacer"></span>
+      <!-- 当前 LLM 提供商徽标（时间线框外，与「查看具体进度」同列右对齐） -->
+      <span
+        class="llm-badge"
+        [class.badge-kimi]="state.activeProvider() === 'kimi'"
+      >
+        当前LLM 提供商：{{
+          state.activeProvider() === "kimi" ? "KIMI-API" : "Ollama"
+        }}
+      </span>
+    </div>
+
+    @if (state.errorMessage(); as msg) {
+      <app-notice type="error" (closed)="state.errorMessage.set(null)">
+        {{ msg }}
+      </app-notice>
+    }
+
+    @if (state.selectedProject(); as proj) {
+      <!-- 五阶段时间线：上传 → 解析 → 关键词 → 提取 → 导出 -->
+      <app-stage-timeline />
+
+      <!-- 提取结果表格 -->
+      <app-extract-table />
+    } @else {
+      <div class="empty-state">
+        <p>任务加载中…</p>
+      </div>
+    }
+  </section>
+
+  <!-- 右栏：PDF 预览（可收起为窄条） -->
+  <aside class="viewer-pane" [class.collapsed]="state.pdfCollapsed()">
+    @if (state.pdfCollapsed()) {
+      <button
+        type="button"
+        class="btn btn-sm btn-link expand-btn"
+        title="展开 PDF 窗格"
+        (click)="state.pdfCollapsed.set(false)"
+      >
+        <span class="expand-arrow">&lt;</span>
+        <span class="expand-text">展开</span>
+      </button>
+    } @else {
+      <app-pdf-viewer />
+    }
+  </aside>
+</div>

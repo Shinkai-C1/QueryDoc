@@ -1,0 +1,237 @@
+<div
+  class="flow-host"
+  #flowHost
+  tabindex="0"
+  (keydown.delete)="onDeleteKey($event)"
+  (keydown.backspace)="onDeleteKey($event)"
+  (keydown.escape)="closeMenus()"
+>
+  <f-flow
+    fDraggable
+    (fMoveNodes)="onMoveNodes($event)"
+    (fCreateConnection)="onCreateConnection($event)"
+    (fSelectionChange)="onSelectionChange($event)"
+    (contextmenu)="onCanvasContextMenu($event, flowHost)"
+  >
+    <f-canvas fZoom>
+      <!-- 环境组背景矩形（纯展示：成员节点保持画布绝对坐标，不嵌套 fNodeParentId） -->
+      @for (g of state.groups(); track g.id) {
+        <div
+          class="env-group"
+          [class.env-manual]="g.env_type === 'manual'"
+          [style.left.px]="groupRect(g)[0]"
+          [style.top.px]="groupRect(g)[1]"
+          [style.width.px]="groupRect(g)[2] - groupRect(g)[0]"
+          [style.height.px]="groupRect(g)[3] - groupRect(g)[1]"
+          (contextmenu)="onGroupContextMenu(g, $event, flowHost)"
+        >
+          <span class="env-label">{{ g.env_type === "it" ? "IT 环境" : "人工环境" }}</span>
+        </div>
+      }
+
+      <!-- 连线（flow 蓝 / role 绿 / data 橙；带箭头） -->
+      @for (e of state.edges(); track e.id) {
+        <f-connection
+          [fConnectionId]="'e' + e.id"
+          [fSourceId]="edgeSourceId(e)"
+          [fTargetId]="edgeTargetId(e)"
+          [class.edge-role]="e.edge_kind === 'role'"
+          [class.edge-data]="e.edge_kind === 'data'"
+          (contextmenu)="onConnectionContextMenu(e, $event, flowHost)"
+        >
+          <f-connection-marker-arrow
+            type="f-connection-marker-end-all-states"
+          ></f-connection-marker-arrow>
+        </f-connection>
+      }
+
+      <!-- 节点（五种形状；四方向连接点；右下缩放手柄） -->
+      <!-- fNode 是画布库拖拽/点选交互元素（非表单控件），豁免点击 a11y 规则 -->
+      <!-- eslint-disable @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+      @for (n of state.nodes(); track n.id) {
+        <div
+          fNode
+          fDragHandle
+          [fNodeId]="'n' + n.id"
+          [fNodePosition]="{ x: n.canvas_x, y: n.canvas_y }"
+          [attr.data-node-id]="n.id"
+          class="node"
+          [class.node-act]="n.node_type === 'ACT'"
+          [class.node-evt]="n.node_type === 'EVT'"
+          [class.node-rol]="n.node_type === 'ROL'"
+          [class.node-dat]="n.node_type === 'DAT'"
+          [class.node-log]="n.node_type === 'LOG'"
+          [class.selected]="state.selectedNodeId() === n.id"
+          [style.width.px]="n.canvas_w > 0 ? n.canvas_w : null"
+          [style.height.px]="n.canvas_h > 0 ? n.canvas_h : null"
+          (fNodeSizeChange)="onNodeSize(n.id, $event)"
+          (click)="onNodeClick(n, $event)"
+          (contextmenu)="onNodeContextMenu(n, $event, flowHost)"
+        >
+          <!-- 四方向连接点（source-target：均可拖出/接入） -->
+          @for (side of sides; track side) {
+            <div
+              fConnector
+              fConnectorType="source-target"
+              [fConnectorId]="connId(n, side)"
+              [fConnectorMultiple]="true"
+              class="conn conn-{{ side }}"
+            ></div>
+          }
+
+          <!-- 编号 + 名称标题 / 中部内容（自适应换行） -->
+          <div class="node-body">
+            <div class="node-head">
+              <span class="node-code">{{ n.code }}</span>
+              <span class="node-name">{{ n.name || typeLabel(n) }}</span>
+            </div>
+            @if (n.content) {
+              <div class="node-content">{{ n.content }}</div>
+            }
+            @if (n.node_type !== "ACT" && n.node_type !== "LOG" && subtypeLabel(n)) {
+              <div class="node-sub">{{ subtypeLabel(n) }}</div>
+            }
+          </div>
+
+          <!-- 右下缩放手柄 -->
+          <div
+            fResizeHandle
+            fResizeHandleType="right-bottom"
+            class="resize-handle"
+            (mousedown)="onResizeStart(n.id)"
+          ></div>
+        </div>
+      }
+      <!-- eslint-enable @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+
+      <f-connection-for-create>
+        <f-connection-marker-arrow
+          type="f-connection-marker-end-all-states"
+        ></f-connection-marker-arrow>
+      </f-connection-for-create>
+      <f-selection-area></f-selection-area>
+    </f-canvas>
+  </f-flow>
+
+  <!-- 缩放控件：右上 icon 按钮（缩小/放大/重置适应全部节点） -->
+  <div class="zoom-bar" role="toolbar" aria-label="画布缩放">
+    <button type="button" class="zoom-btn" title="缩小" aria-label="缩小" (click)="zoomOut()">
+      −
+    </button>
+    <button type="button" class="zoom-btn" title="放大" aria-label="放大" (click)="zoomIn()">
+      ＋
+    </button>
+    <button
+      type="button"
+      class="zoom-btn"
+      title="重置缩放（全部节点适应画面）"
+      aria-label="重置缩放"
+      (click)="fitAll()"
+    >
+      ⛶
+    </button>
+  </div>
+
+  <!-- 画布右键菜单：增加节点（级联）/ 创建环境组 -->
+  @if (canvasMenu(); as m) {
+    <div class="ctx-menu" [style.left.px]="m.x" [style.top.px]="m.y" role="menu">
+      <div class="menu-item has-sub" role="menuitem" aria-haspopup="true" tabindex="0">
+        增加节点 <span class="sub-arrow">▸</span>
+        <div class="submenu" [class.sub-left]="m.openLeft">
+          @for (t of cascade; track t.type) {
+            @if (t.subs.length === 0) {
+              <div class="menu-item" role="menuitem" tabindex="0" (click)="addNodeOfType(t.type, null)" (keydown.enter)="addNodeOfType(t.type, null)">
+                {{ t.label }}
+              </div>
+            } @else {
+              <div class="menu-item has-sub" role="menuitem" aria-haspopup="true" tabindex="0">
+                {{ t.label }} <span class="sub-arrow">▸</span>
+                <div class="submenu" [class.sub-left]="m.openLeft">
+                  @for (s of t.subs; track s.value) {
+                    <div class="menu-item" role="menuitem" tabindex="0" (click)="addNodeOfType(t.type, s.value)" (keydown.enter)="addNodeOfType(t.type, s.value)">
+                      {{ s.label }}
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-label" [class.disabled]="!hasSelection()">创建环境组（先框选节点）</div>
+      <button
+        type="button"
+        class="menu-item"
+        role="menuitem"
+        [disabled]="!hasSelection()"
+        (click)="createGroup('it')"
+      >
+        IT 环境
+      </button>
+      <button
+        type="button"
+        class="menu-item"
+        role="menuitem"
+        [disabled]="!hasSelection()"
+        (click)="createGroup('manual')"
+      >
+        人工环境
+      </button>
+      <div class="menu-sep"></div>
+      <button type="button" class="menu-item menu-cancel" role="menuitem" (click)="closeMenus()">
+        取消
+      </button>
+    </div>
+  }
+
+  <!-- 节点右键菜单 -->
+  @if (nodeMenu(); as m) {
+    <div class="ctx-menu" [style.left.px]="m.x" [style.top.px]="m.y" role="menu">
+      <button type="button" class="menu-item" role="menuitem" (click)="viewNodeProps(m.node)">
+        查看属性
+      </button>
+      <button type="button" class="menu-item" role="menuitem" (click)="deleteNode(m.node)">
+        删除节点 {{ m.node.code }}
+      </button>
+      <button type="button" class="menu-item menu-cancel" role="menuitem" (click)="closeMenus()">
+        取消
+      </button>
+    </div>
+  }
+
+  <!-- 环境组右键菜单 -->
+  @if (groupMenu(); as m) {
+    <div class="ctx-menu" [style.left.px]="m.x" [style.top.px]="m.y" role="menu">
+      <button type="button" class="menu-item" role="menuitem" (click)="dissolveGroup(m.group)">
+        解散环境组（节点保留）
+      </button>
+      <button type="button" class="menu-item menu-cancel" role="menuitem" (click)="closeMenus()">
+        取消
+      </button>
+    </div>
+  }
+
+  <!-- 连线右键菜单 -->
+  @if (connMenu(); as m) {
+    <div class="ctx-menu" [style.left.px]="m.x" [style.top.px]="m.y" role="menu">
+      <button type="button" class="menu-item" role="menuitem" (click)="deleteConnection(m.edge)">
+        删除连线
+      </button>
+      <button type="button" class="menu-item menu-cancel" role="menuitem" (click)="closeMenus()">
+        取消
+      </button>
+    </div>
+  }
+
+  <!-- 节点属性编辑面板（仅右键「查看属性」展开；点击不触发） -->
+  @if (state.propsPanelOpen()) {
+    <app-node-props-panel />
+  }
+
+  @if (state.nodes().length === 0) {
+    <div class="empty-hint muted">
+      右键「增加节点」，或在右侧 PDF 框选文字经 OCR 创建节点
+    </div>
+  }
+</div>
