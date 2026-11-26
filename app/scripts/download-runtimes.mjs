@@ -31,16 +31,29 @@ const RESOURCES = path.join(__dirname, '..', 'src-tauri', 'resources');
 const ORT_VERSION = '1.28.0';
 const PDFIUM_TAG = 'chromium/8035'; // bblanchon/pdfium-binaries（PDFium 154.0.8035.0）
 
+// 备用下载源：本仓库 Release 自托管的官方归档副本（sha256 与官方一致，校验逻辑不变）。
+// 官方源（github.com/microsoft/onnxruntime）在部分网络与 GitHub Actions 出口下会 404。
+const MIRROR_BASE =
+  'https://github.com/Shinkai-C1/QueryDoc/releases/download/resources-v1';
+
 const RUNTIMES = {
   'darwin-arm64': {
     ort: {
-      url: `https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-osx-arm64-${ORT_VERSION}.tgz`,
+      file: `onnxruntime-osx-arm64-${ORT_VERSION}.tgz`,
+      urls: [
+        `https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-osx-arm64-${ORT_VERSION}.tgz`,
+        `${MIRROR_BASE}/onnxruntime-osx-arm64-${ORT_VERSION}.tgz`,
+      ],
       sha256: '1268b359718099bde2cedb55787f182a130067bc4f31e8c88478c445b850d3d8',
       archiveMember: `onnxruntime-osx-arm64-${ORT_VERSION}/lib/libonnxruntime.${ORT_VERSION}.dylib`,
       dest: path.join(RESOURCES, 'onnxruntime', `libonnxruntime.${ORT_VERSION}.dylib`),
     },
     pdfium: {
-      url: `https://github.com/bblanchon/pdfium-binaries/releases/download/${PDFIUM_TAG.replace('/', '%2F')}/pdfium-mac-arm64.tgz`,
+      file: 'pdfium-mac-arm64.tgz',
+      urls: [
+        `https://github.com/bblanchon/pdfium-binaries/releases/download/${PDFIUM_TAG.replace('/', '%2F')}/pdfium-mac-arm64.tgz`,
+        `${MIRROR_BASE}/pdfium-mac-arm64.tgz`,
+      ],
       sha256: '308fd9c6eff1be5b7bde62e7a9a42f525075901314a2a50058ae0b6ea0ff30a2',
       archiveMember: 'lib/libpdfium.dylib',
       dest: path.join(RESOURCES, 'pdfium', 'libpdfium.dylib'),
@@ -48,13 +61,21 @@ const RUNTIMES = {
   },
   'win-x64': {
     ort: {
-      url: `https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-win-x64-${ORT_VERSION}.zip`,
+      file: `onnxruntime-win-x64-${ORT_VERSION}.zip`,
+      urls: [
+        `https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-win-x64-${ORT_VERSION}.zip`,
+        `${MIRROR_BASE}/onnxruntime-win-x64-${ORT_VERSION}.zip`,
+      ],
       sha256: 'abef733dacbe2f571547a7150b479b5cb9cc0df22f96c24983a42cadb1b4f8bc',
       archiveMember: `onnxruntime-win-x64-${ORT_VERSION}/lib/onnxruntime.dll`,
       dest: path.join(RESOURCES, 'onnxruntime', 'onnxruntime.dll'),
     },
     pdfium: {
-      url: `https://github.com/bblanchon/pdfium-binaries/releases/download/${PDFIUM_TAG.replace('/', '%2F')}/pdfium-win-x64.tgz`,
+      file: 'pdfium-win-x64.tgz',
+      urls: [
+        `https://github.com/bblanchon/pdfium-binaries/releases/download/${PDFIUM_TAG.replace('/', '%2F')}/pdfium-win-x64.tgz`,
+        `${MIRROR_BASE}/pdfium-win-x64.tgz`,
+      ],
       sha256: '61513d611ad200a383456140739be77d156f1e3a2eef22bd89f6c3bda79bdd41',
       archiveMember: 'bin/pdfium.dll',
       dest: path.join(RESOURCES, 'pdfium', 'pdfium.dll'),
@@ -106,10 +127,21 @@ async function ensureRuntime(name, spec, tmpDir) {
     }
   } catch { /* 不存在则下载 */ }
 
-  // 先下载并校验，成功后才替换目标（失败不破坏现有安装）
-  const archive = path.join(tmpDir, path.basename(spec.url));
-  console.log(`[runtimes] 下载 ${name} <- ${spec.url}`);
-  await download(spec.url, archive);
+  // 先下载并校验，成功后才替换目标（失败不破坏现有安装）；
+  // 按顺序尝试官方源与备用源，任一成功即可
+  const archive = path.join(tmpDir, spec.file);
+  let downloaded = false;
+  for (const url of spec.urls) {
+    console.log(`[runtimes] 下载 ${name} <- ${url}`);
+    try {
+      await download(url, archive);
+      downloaded = true;
+      break;
+    } catch (e) {
+      console.warn(`[runtimes] 该源失败，尝试下一个（${e.message.split('\n')[0]}）`);
+    }
+  }
+  if (!downloaded) throw new Error(`${name} 所有下载源均失败`);
   const actual = await sha256Of(archive);
   if (actual !== spec.sha256) {
     throw new Error(`${name} 归档 sha256 校验失败: 期望 ${spec.sha256} 实际 ${actual}`);
