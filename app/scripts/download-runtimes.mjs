@@ -16,7 +16,7 @@
  */
 import { createHash } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import { mkdir, mkdtemp, stat, unlink, rename, readFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, stat, unlink, readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';

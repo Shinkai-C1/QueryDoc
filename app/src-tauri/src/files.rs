@@ -292,7 +292,13 @@ mod tests {
         let src_dir = tmp.path().join("src");
         std::fs::create_dir_all(&src_dir).unwrap();
         let f1 = make_pdf(&src_dir, "合同 （终版）.pdf");
-        let f2 = make_pdf(&src_dir, "..\u{7}奇怪.pdf");
+        // Windows 不允许文件名含控制字符（无法创建源文件），该平台仅测 ".." 净化
+        let dangerous = if cfg!(windows) {
+            "..奇怪.pdf"
+        } else {
+            "..\u{7}奇怪.pdf"
+        };
+        let f2 = make_pdf(&src_dir, dangerous);
 
         let result = upload_files(&db, p.id, &[f1, f2]).unwrap();
         assert_eq!(result.files.len(), 2);
