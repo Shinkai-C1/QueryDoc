@@ -10,7 +10,7 @@ cell-to-source character-level cross-highlighting in the preview, and xlsx/zip e
 Single user, no login — all data stays on your machine.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/your-org/QueryDoc/actions/workflows/tauri-build.yml/badge.svg)](https://github.com/your-org/QueryDoc/actions/workflows/tauri-build.yml)
+[![CI](https://github.com/Shinkai-C1/QueryDoc/actions/workflows/tauri-build.yml/badge.svg)](https://github.com/Shinkai-C1/QueryDoc/actions/workflows/tauri-build.yml)
 
 > 截图与演示 GIF 待补充（Screenshots coming soon）。
 
