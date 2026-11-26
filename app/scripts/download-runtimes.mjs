@@ -148,7 +148,10 @@ async function ensureRuntime(name, spec, tmpDir) {
   }
   const extracted = extractMember(archive, spec.archiveMember, tmpDir);
   await mkdir(path.dirname(spec.dest), { recursive: true });
-  await rename(extracted, spec.dest);
+  // Windows runner 临时目录（C:）与仓库（D:）不同盘，rename 会 EXDEV，故复制后删除
+  const { copyFile } = await import('node:fs/promises');
+  await copyFile(extracted, spec.dest);
+  await unlink(extracted);
   // 记录来源归档哈希作为安装标记
   const { writeFile } = await import('node:fs/promises');
   await writeFile(`${spec.dest}.sha256`, spec.sha256 + '\n');
