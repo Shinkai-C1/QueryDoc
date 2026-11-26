@@ -43,16 +43,25 @@ jobs:
         with:
           workspaces: app/src-tauri
 
-      - name: Rust 格式与静态检查
-        run: |
-          cargo fmt --check --manifest-path src-tauri/Cargo.toml
-          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      - name: 缓存 OCR 模型与运行时（约 200MB，清单或脚本变更时失效）
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/src-tauri/resources/ocr-models/files
+            app/src-tauri/resources/onnxruntime
+            app/src-tauri/resources/pdfium
+          key: ocr-resources-${{ hashFiles('app/src-tauri/resources/ocr-models/models.toml', 'app/scripts/download-models.mjs', 'app/scripts/download-runtimes.mjs') }}
 
       - name: 下载并校验 OCR 模型（models.toml）
         run: node scripts/download-models.mjs
 
       - name: 下载并校验 OCR 运行时库（ONNX Runtime / pdfium）
         run: node scripts/download-runtimes.mjs
+
+      - name: Rust 格式与静态检查
+        run: |
+          cargo fmt --check --manifest-path src-tauri/Cargo.toml
+          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 
       - name: Rust 测试
         run: cargo test --manifest-path src-tauri/Cargo.toml --all-targets
