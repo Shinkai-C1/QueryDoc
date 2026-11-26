@@ -31,3 +31,11 @@ build:
 check:
 	cd $(APP_DIR)/src-tauri && $(CARGO) fmt --check && $(CARGO) clippy --all-targets -- -D warnings
 	cd $(APP_DIR) && $(PNPM) ng lint
+
+# 一键清理可再生的本地产物（发布后可随手执行；再次开发前 make setup 复原）
+.PHONY: clean
+clean:
+	rm -rf $(APP_DIR)/node_modules $(APP_DIR)/dist $(APP_DIR)/.angular
+	rm -rf $(APP_DIR)/src-tauri/target
+	rm -rf $(APP_DIR)/src-tauri/resources/ocr-models/files \
+		$(APP_DIR)/src-tauri/resources/onnxruntime $(APP_DIR)/src-tauri/resources/pdfium
