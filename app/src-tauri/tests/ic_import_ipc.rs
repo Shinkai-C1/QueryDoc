@@ -47,7 +47,13 @@ fn ic_import_docs_via_ipc_returns_result() {
             cmd: "ic_import_docs".into(),
             callback: tauri::ipc::CallbackFn(0),
             error: tauri::ipc::CallbackFn(1),
-            url: "tauri://localhost".parse().unwrap(),
+            // IPC origin 分平台（macOS/Linux: tauri://localhost，Windows: http://tauri.localhost），
+            // 写错会被 ACL 以 "not allowed. Plugin not found" 拒绝
+            url: if cfg!(windows) {
+                "http://tauri.localhost".parse().unwrap()
+            } else {
+                "tauri://localhost".parse().unwrap()
+            },
             body: tauri::ipc::InvokeBody::Json(serde_json::json!({
                 "projectId": project.id,
                 "srcDir": src.to_string_lossy(),
