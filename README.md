@@ -1,8 +1,10 @@
 # QueryDoc
 
-本地离线桌面应用：上传扫描版 PDF → PP-OCRv6 内嵌解析 → LLM 关键词提取
+本地桌面应用：上传扫描版 PDF → PP-OCRv6 内嵌解析 → LLM 关键词提取
 （本地 Ollama 或 OpenAI 兼容 API）→ 表格核对（单元格与 PDF 原文单字级联动高亮）→
-导出 xlsx / zip。另含内控测试工作区（流程图建模、制度文件关联、人员名册管理）。
+导出 xlsx / zip。
+
+具体应用操作详见[QueryDoc使用说明](./doc/QueryDoc使用说明.md)
 
 A local-first desktop app that turns scanned PDFs into structured data:
 embedded PP-OCRv6 parsing, LLM keyword extraction (Ollama or any OpenAI-compatible API),
@@ -11,14 +13,23 @@ cell-to-source cross-highlighting, and xlsx/zip export.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/Shinkai-C1/QueryDoc/actions/workflows/tauri-build.yml/badge.svg)](https://github.com/Shinkai-C1/QueryDoc/actions/workflows/tauri-build.yml)
 
-> **项目性质**：这是个人首个开源仓库，属于 **vibe coding 的 demo 产物**——核心功能可以跑通，
-> 但稳定性、错误处理、测试覆盖等均无法与成熟产品相比。仅作技术验证与分享，
-> 按"现状"提供，**不接受 Issue、PR 等任何形式的协作贡献**，也无长期维护承诺。
+> [!WARNING]
+> 本项目属于 **vibe coding 的 demo 产物**，核心功能已实现，但稳定性等无法确保与成熟产品一致，仅作分享。
+
+## 项目背景
+传统财务审计执行细节测试的场景：执业人员同时打开excel底稿与相关附件（pdf或照片），手工摘录/OCR提取后复制至底稿，并完善整理成表格。存在以下几类问题：
+
+- 在Excel 底稿与各类附件（PDF、图片等）之间频繁切换窗口，打开、关闭与检索操作，交互效率低。
+- 手工摘录或OCR辅助复制，重复性的数据搬运，严重挤压了执业人员发挥职业判断时间窗口。
+- 成果底稿中的明细数据与底层原始凭证缺乏关联（基本仅靠执业人员底稿标注索引的精细程度），无法快速追溯数据在原文件中的具体位置，易导致审计证据链条断裂，增加了复核时间成本与审计风险
+- 附件归档与底稿索引的编制高度依赖执业人员核对，附件索引的编制与维护繁琐且易因漏记、错记导致索引失效。
+
+为此构建一个“底稿-附件一体化、数据提取自动可追溯”操作平台十分必要。
 
 ## 功能特性
 
 - **解析提取**：批量上传 PDF → OCR 解析 → 配置关键词 → LLM 提取（引用未命中原文时单元格标「疑」提示人工复核）→ 表格与 PDF 预览单字级联动 → 导出。
-- **PDF 预览**：多页懒渲染、缩放、CJK 字体映射与扫描件（JBIG2）解码，单元格点击跳转原文位置。
+- **PDF 预览**：提取结果单元格点击可跳转原文位置，供人工追溯快速复核，形成人机回环。
 - **离线优先**：OCR 引擎（ONNX Runtime + PP-OCRv6 small）随包内置；LLM 可选本地 Ollama（默认）或 OpenAI 兼容 API。
 - **数据本地**：元数据存 SQLite，文件存用户选择的项目目录，无登录、不上传。
 
