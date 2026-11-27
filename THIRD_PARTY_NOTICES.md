@@ -10,12 +10,17 @@ QueryDoc 本体代码以 [MIT](LICENSE) 许可开源；其集成的下列第三�
 
 | 组件 | 来源 | 许可证 |
 | --- | --- | --- |
-| PP-OCRv6 small det/rec 模型、PP-LCNet 文档方向分类模型、识别字典 | [PaddlePaddle（HuggingFace 官方 org）](https://huggingface.co/PaddlePaddle) | **Apache-2.0** |
+| PP-OCRv6 small 文字检测/识别模型（det / rec）、PP-LCNet 文档方向与文本行方向分类模型（doc_ori / textline_ori）、识别字典 | [PaddlePaddle（HuggingFace 官方 org）](https://huggingface.co/PaddlePaddle) | **Apache-2.0** |
 | ONNX Runtime 1.28.0 | [microsoft/onnxruntime](https://github.com/microsoft/onnxruntime) | MIT |
 | PDFium（chromium/8035 预编译包） | [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries)（Google PDFium 构建） | BSD-3-Clause（The PDFium Authors） |
 
 Apache-2.0 许可全文见 <https://www.apache.org/licenses/LICENSE-2.0>；
 使用上述组件须遵守其许可证要求（保留版权与许可声明）。
+
+> 分发渠道说明：上述运行时归档在本仓库 Release `resources-v1` 中留有
+> **逐字节未修改的副本**作为下载镜像（内容与官方发布一致，下载脚本按 sha256
+> 校验官方源与镜像源，见 `app/scripts/download-runtimes.mjs`），仅为提升下载
+> 可用性，不构成对组件的修改或再许可。
 
 ## 随包内置的前端资源（pdf.js 发行物）
 
